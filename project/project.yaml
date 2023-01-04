@@ -34,22 +34,18 @@ Targets:
   US: ~
   EU: ~
   JP: ~
-  Template/Tricky:
-    Modules:
-      - buffs # What if we made the game a bit more tricky...
-    Remove/Modules:
-      - yoshicolors
+  Template/SME:
     Defines:
-      - TARGET_TRICKY
-  Tricky_US:
-    Extends: Tricky
+      - TARGET_SME
+  SME_US:
+    Extends: SME
     AddrMap: US
     BaseRpx: US
-  Tricky_EU:
-    Extends: Tricky
+  SME_EU:
+    Extends: SME
     AddrMap: EU
     BaseRpx: EU
-  Tricky_JP:
-    Extends: Tricky
+  SME_JP:
+    Extends: SME
     AddrMap: JP
     BaseRpx: JP
