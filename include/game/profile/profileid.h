@@ -295,6 +295,7 @@ ENUM_CLASS(ProfileID,
     NullActor,
     Solid,
     UniversalMovementController,
+    FloatyGoomba,
 
     Num
 );
