@@ -1,6 +1,5 @@
 #include "game/actor/stage/enemy.h"
 #include "game/graphics/model/modelnw.h"
-#include "game/actor/actormgr.h"
 #include "game/sound/sound.h"
 #include "game/actor/stage/playerbase.h"
 #include "game/effect/effect.h"
@@ -38,14 +37,6 @@ FloatyGoomba::FloatyGoomba(const ActorBuildInfo* buildInfo)
 { }
 
 u32 FloatyGoomba::onCreate() {
-    for (Actor** it = ActorMgr::instance()->actors.start.buffer; it != ActorMgr::instance()->actors.end.buffer; ++it) {
-        if (*it == nullptr || (*it)->getProfileID() != ProfileID::Water) {
-            continue;
-        }
-
-        this->position.y = (*(StageActor**)it)->position.y - 1.35f;
-    }
-
     static const HitboxCollider::Info collisionInfo = {
         0.0f, 10.0f, HitboxCollider::Shape::Rectangle, 5, 0, 0x824F, 0xFFFBFFFF, 0, &FloatyGoomba::collisionCallback
     };
