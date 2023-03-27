@@ -297,5 +297,8 @@ ENUM_CLASS(ProfileID,
     UniversalMovementController,
     FloatyGoomba,
 
+    CarterraCamera,
+    CarterraMap,
+
     Num
 );

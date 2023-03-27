@@ -163,7 +163,7 @@
 # sead::LookAtCamera
     __dt__Q2_4sead12LookAtCameraFv = 0x2A04B94;
     __vtbl__Q2_4sead12LookAtCamera = 0x1019084C;
-    doUpdateMatrix__Q2_4sead12LookAtCameraCFP5Mtx34 = 0x2A04BE8;
+    doUpdateMatrix__Q2_4sead12LookAtCameraCFPQ2_4sead17Matrix34__tm__2_f = 0x2A04BE8;
 
 # sead::MathCalcCommon
     chase__Q2_4sead23MathCalcCommon__tm__2_fSFPZ1ZZ1ZT2_b = 0x2027984;
@@ -1066,12 +1066,6 @@
     getRuntimeTypeInfo__8ObjLayerCFv = __deleted_virtual_called;
     vf3C__8ObjLayerFv = 0x24FD0E8;
     vf5C__8ObjLayerFv = 0x24FD0F4;
-    setParentRenderer__8ObjLayerFP16ObjLayerRenderer = 0x24FCA24;
-
-# ObjLayerRenderer
-    __dt__16ObjLayerRendererFv = 0x24FB0AC;
-    __ct__16ObjLayerRendererFRCQ2_4sead23SafeStringBase__tm__2_c = 0x24FAF58;
-    init__16ObjLayerRendererFUiN31PQ2_4sead4Heap = 0x24FB128;
 
 # PhysicsActor
     __vtbl__12PhysicsActor = 0x1000084C;
@@ -1217,7 +1211,7 @@
     resourcesLoadAtOriginal__7Profile = 0x10002064;
     resourceCountOriginal__7Profile = 0x100023F8;
     resourceListsOriginal__7Profile = 0x101C321C;
-    loadProfileResources__7ProfileSFQ2_7Profile15LoadResourcesAtPQ2_4sead4Heap = 0x200A738;
+    loadProfileResources__7ProfileSFQ3_7Profile15LoadResourcesAt8__type__PQ2_4sead4Heap = 0x200A738;
 
 # PtclMgr
     sInstance__7PtclMgr = 0x101CD3A8;
@@ -1234,6 +1228,12 @@
 
 # RectCollider
     __vtbl__12RectCollider = 0x100FB820;
+
+# RenderMgr
+    __dt__9RenderMgrFv = 0x24FB0AC;
+    __ct__9RenderMgrFRCQ2_4sead23SafeStringBase__tm__2_c = 0x24FAF58;
+    init__9RenderMgrFUiN31PQ2_4sead4Heap = 0x24FB128;
+    setParentRenderer__8ObjLayerFP9RenderMgr = 0x24FCA24;
 
 # RenderObjLayer
     __ct__14RenderObjLayerFv = 0x24FCA6C;

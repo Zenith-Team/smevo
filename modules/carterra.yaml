@@ -1,0 +1,18 @@
+
+---
+Files:
+  - carterra/scene.cpp
+  - carterra/renderer.cpp
+  - carterra/camera.cpp
+  - carterra/map.cpp
+Hooks:
+  # Entry point
+  - type: branch
+    instr: b
+    addr: "0x202B86C" # CourseSelectTask::construct()
+    func: construct__Q2_3crt5SceneSFRCQ2_4sead16TaskConstructArg
+# Set instance
+  - type: branch
+    instr: b
+    addr: "0x22656C0"
+    func: setInstance__Q2_3crt5SceneSFPQ2_4sead8TaskBase
