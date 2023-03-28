@@ -943,7 +943,7 @@ u32 Profile::spriteToProfileList[] = {
     ProfileID::NullActor,                   // 849
 //! Reserved Area 2
     ProfileID::FloatyGoomba,                // 850
-    ProfileID::NullActor,                   // 851
+    ProfileID::NPC,                         // 851
     ProfileID::NullActor,                   // 852
     ProfileID::NullActor,                   // 853
     ProfileID::NullActor,                   // 854

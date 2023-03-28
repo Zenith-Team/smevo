@@ -296,6 +296,7 @@ ENUM_CLASS(ProfileID,
     Solid,
     UniversalMovementController,
     FloatyGoomba,
+    NPC,
 
     CarterraCamera,
     CarterraMap,
