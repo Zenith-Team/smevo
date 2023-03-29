@@ -54,6 +54,7 @@ u32 NPC::onCreate() {
     this->layout.init();
     this->layout.getArchive("Common");
     this->layout.loadBFLYT("BaloonGuide.bflyt");
+    this->layout.getTextBoxPane("T_Text_00")->setTextFromMSBT("NPC_Test");
 
     static const sead::SafeString anims[] = {
         "In"
