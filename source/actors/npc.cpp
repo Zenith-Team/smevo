@@ -1,7 +1,10 @@
 #include "game/actor/stage/stageactor.h"
+#include "game/actor/actoradditionalheap.h"
+#include "sead/heapmgr.h"
 #include "game/layout/layoutcontainer.h"
 #include "game/graphics/model/modelnw.h"
 #include "tsuru/layoutrenderer.h"
+#include "log.h"
 
 class NPCSpeechLayout : public LayoutContainer {
 public:
@@ -27,6 +30,7 @@ public:
 
     ModelWrapper* model;
     NPCSpeechLayout layout;
+    ActorAdditionalHeap layoutHeap;
 };
 
 REGISTER_PROFILE(NPC, ProfileID::NPC);
@@ -36,23 +40,30 @@ NPC::NPC(const ActorBuildInfo* buildInfo)
     : StageActor(buildInfo)
     , model(nullptr)
     , layout()
+    , layoutHeap()
 { }
 
 u32 NPC::onCreate() {
     this->model = ModelWrapper::create("star_coin", "star_coinA");
 
+    this->layoutHeap.create();
+
+    sead::Heap* currentHeap = sead::HeapMgr::instance()->getCurrentHeap();
+    sead::HeapMgr::instance()->setCurrentHeap(this->layoutHeap.heap);
+
     this->layout.init();
     this->layout.getArchive("Common");
-    this->layout.loadBFLYT("PaBattery.bflyt");
+    this->layout.loadBFLYT("BaloonGuide.bflyt");
 
     static const sead::SafeString anims[] = {
         "In"
     };
 
-    static u32 size = sizeof(anims) / sizeof(anims[0]);
-
+    //static u32 size = sizeof(anims) / sizeof(anims[0]);
     //this->layout.initAnims(anims, size);
     //this->layout.playAnim(0, "In", false);
+
+    sead::HeapMgr::instance()->setCurrentHeap(currentHeap);
 
     return this->onExecute();
 }
@@ -65,6 +76,8 @@ u32 NPC::onExecute() {
     this->model->updateModel();
 
     this->layout.update(0xE);
+
+    sead::Mathu::chase(&this->rotation.y, Direction::directionToRotationList[this->directionToPlayerH(this->position)], fixDeg(1.75f));
 
     return 1;
 }
