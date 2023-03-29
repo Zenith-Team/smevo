@@ -4,6 +4,7 @@
 #include "game/layout/layoutcontainer.h"
 #include "game/graphics/model/modelnw.h"
 #include "tsuru/layoutrenderer.h"
+#include "game/level/levelcamera.h"
 #include "log.h"
 
 class NPCSpeechLayout : public LayoutContainer {
@@ -76,7 +77,16 @@ u32 NPC::onExecute() {
     this->model->setScale(this->scale);
     this->model->updateModel();
 
-    this->layout.update(0xE);
+    const LevelCamera* const cam = LevelCamera::instance();
+
+    Vec3f pos;
+    pos.x = (this->position.x - cam->cameraCenterX) / (cam->cameraRight - cam->cameraCenterX);
+    pos.y = (this->position.y - cam->cameraCenterY) / (cam->cameraTop - cam->cameraCenterY);
+    pos.z = 0.0f;
+
+    mtx.makeT(pos);
+
+    this->layout.update(0xE, &mtx);
 
     sead::Mathu::chase(&this->rotation.y, Direction::directionToRotationList[this->directionToPlayerH(this->position)], fixDeg(1.75f));
 
