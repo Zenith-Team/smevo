@@ -92,6 +92,8 @@ u32 NPC::onExecute() {
 
     sead::Mathu::chase(&this->rotation.y, Direction::directionToRotationList[this->directionToPlayerH(this->position)], fixDeg(1.75f));
 
+    sead::Mathu::chase(&this->rotation.y, Direction::directionToRotationList[this->directionToPlayerH(this->position)], fixDeg(1.75f));
+
     return 1;
 }
 
