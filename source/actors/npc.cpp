@@ -79,12 +79,14 @@ u32 NPC::onExecute() {
 
     const LevelCamera* const cam = LevelCamera::instance();
 
-    Vec3f pos;
-    pos.x = (this->position.x - cam->cameraCenterX) / (cam->cameraRight - cam->cameraCenterX);
-    pos.y = (this->position.y - cam->cameraCenterY) / (cam->cameraTop - cam->cameraCenterY);
-    pos.z = 0.0f;
+    Vec3f pos(
+        ((this->position.x + 16.0f) - cam->cameraCenterX) / (cam->cameraRight - cam->cameraCenterX),
+        ((this->position.y + 20.0f) - cam->cameraCenterY) / (cam->cameraTop - cam->cameraCenterY)
+    );
 
-    mtx.makeT(pos);
+    pos *= Vec2f(640.0f, 360.0f);
+
+    mtx.makeRTIdx(0, pos);
 
     this->layout.update(0xE, &mtx);
 
