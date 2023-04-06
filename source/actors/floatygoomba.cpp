@@ -23,6 +23,7 @@ public:
     ModelWrapper* floaty;
     ModelWrapper* model;
     f32 t;
+    bool onlyFloaty;
 
     DECLARE_STATE(FloatyGoomba, Die);
 };
@@ -34,6 +35,7 @@ PROFILE_RESOURCES(ProfileID::FloatyGoomba, Profile::LoadResourcesAt::Course, "uk
 
 FloatyGoomba::FloatyGoomba(const ActorBuildInfo* buildInfo)
     : Enemy(buildInfo)
+    , onlyFloaty(buildInfo->eventID1 >> 0x4 & 0x1) // nybble 1
 { }
 
 u32 FloatyGoomba::onCreate() {
@@ -45,8 +47,11 @@ u32 FloatyGoomba::onCreate() {
     this->addHitboxColliders();
 
     this->floaty = ModelWrapper::create("ukibofloat", "ukibofloat");
-    this->model = ModelWrapper::create("kuribo", "kuribo", 1);
-    this->model->playSklAnim("hikkuri");
+
+    if (!this->onlyFloaty) {
+        this->model = ModelWrapper::create("kuribo", "kuribo", 1);
+        this->model->playSklAnim("hikkuri");
+    }
 
     return this->onExecute();
 }
@@ -70,19 +75,21 @@ u32 FloatyGoomba::onExecute() {
     // Bob up and down
     this->position.y += sinf(++this->t * 0.025f) * 0.07f;
 
-    if (this->distanceToPlayer().length() > 4*16 || !this->model) {
-        sead::Mathu::chase(&this->rotation.y, 0, fixDeg(1.25f));
-        return 1;
+    if (!this->onlyFloaty && this->model) {
+        this->direction = this->directionToPlayerH(this->position);
+        sead::Mathu::chase(&this->rotation.y, Direction::directionToRotationList[this->direction], fixDeg(2.5f));
+
+        sead::Mathf::chase(&this->position.x, this->distanceToPlayer().x + this->position.x, 0.25f);
+
+        if (this->distanceToPlayer().length() > 4*16 || !this->model) {
+            sead::Mathu::chase(&this->rotation.y, 0, fixDeg(1.25f));
+            return 1;
+        }
     }
-
-    this->direction = this->directionToPlayerH(this->position);
-    sead::Mathu::chase(&this->rotation.y, Direction::directionToRotationList[this->direction], fixDeg(2.5f));
-
-    sead::Mathf::chase(&this->position.x, this->distanceToPlayer().x + this->position.x, 0.25f);
 
     return 1;
 }
-
+        
 u32 FloatyGoomba::onDraw() {
     if (this->model) {
         this->model->draw();
@@ -94,7 +101,7 @@ u32 FloatyGoomba::onDraw() {
 }
 
 void FloatyGoomba::collisionPlayer(HitboxCollider* hcSelf, HitboxCollider* hcOther) {
-    if (this->model == nullptr && hcOther->owner->position.y - this->position.y > 0.0f) {
+    if (this->onlyFloaty || (this->model == nullptr && hcOther->owner->position.y - this->position.y > 0.0f)) {
         hcOther->owner->speed.y = 4.0f;
         playSound(SoundEffects::SE_PLY_RIDE_CLOUD, this->position);
 
@@ -111,6 +118,13 @@ void FloatyGoomba::collisionPlayer(HitboxCollider* hcSelf, HitboxCollider* hcOth
 }
 
 bool FloatyGoomba::collisionGroundPound(HitboxCollider* hcSelf, HitboxCollider* hcOther) {
+    if (this->onlyFloaty) {
+        hcOther->owner->speed.y = 4.0f;
+        playSound(SoundEffects::SE_PLY_RIDE_CLOUD, this->position);
+        
+        return;
+    }
+
     if (this->model) {
         this->killPlayerJump(hcOther->owner, 0.0f, &FloatyGoomba::StateID_Die);
 
