@@ -50,6 +50,7 @@ Files:
   - actors/universalmovementcontroller.cpp
   - actors/floatygoomba.cpp
   - actors/npc.cpp
+  - actors/wingo.cpp
 #* Course Select Actors:
   - actors/csrootspawner.cpp
   - actors/csflames.cpp
