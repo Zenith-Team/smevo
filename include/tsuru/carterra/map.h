@@ -6,83 +6,83 @@
 namespace crt {
 
     class MapData {
-    private:
-        class ResData { // Static data from the file
-        public:
-            enum { MAGIC = 0x41324C53 };
-            
-        public:
-            struct Header {
-                u32 magic;
-                u32 version;
-                u32 nodeCount;
-            };
-
-            struct WorldInfo {
-                char name[32];
-                u32 accentColor;
-            };
-
-            struct Node {
-                ENUM_CLASS(Type,
-                    Normal,
-                    Passthrough,
-                    Level
-                );
-
-                struct Connection {
-                    ENUM_CLASS(Flags,
-                        AlwaysUnlocked = 1 << 0,
-                        NormalExit = 1 << 1,
-                        SecretExit = 1 << 2,
-                        NoReverse = 1 << 3,
-                    );
-                    
-                    u32 node;   // Connected node ID
-                    u32 flags;
-                    f32 speed;  // Walking speed
-                };
-
-                u32 id;
-                Type::__type__ type;
-                char boneName[32];
-                union {
-                    struct {
-                        Connection connections[4];
-                    } normal, passthrough;
-                    struct {
-                        Connection connections[4];
-                        u8 level;
-                        bool hasSecretExit;
-                        bool unlocksWorld;
-                        u32 unlocksWorldID;
-                    } level;
-                };
-            };
+    public:
+        enum {
+            MAGIC = 0x41324C53,
+            VERSION = 1
+        };
         
-        public:
-            ResData(u32 id);
-            ~ResData();
-
-            Header header;
-            WorldInfo worldInfo;
-            Node* nodes;
+    public:
+        struct Header {
+            u32 magic;
+            u32 version;
+            u32 mapID; // Unique to each worldmap
         };
 
-    public:
-        class Node : public ResData::Node {
-        public:
-            void update();
-
-            ModelWrapper* model;
+        struct WorldInfo {
+            u32 worldID; // Used with level IDs
+            char name[32];
+            u32 accentColor;
         };
 
-    public:
-        MapData(u32 id);
-        ~MapData();
+        struct Node {
+            ENUM_CLASS(Type,
+                Normal,
+                Passthrough,
+                Level
+            );
 
-        ResData::Header header;
-        ResData::WorldInfo worldInfo;
+            Type::__type__ type;
+            char boneName[32];
+            union {
+                struct {
+
+                } normal, passthrough;
+                struct {
+                    u8 levelID;
+                    u32 unlocksMapID;
+                } level;
+            };
+        };
+
+        struct Path {
+            ENUM_CLASS(Animation,
+                Walk = 0, WalkSand = 1, WalkSnow = 2, WalkWet = 3,
+                Jump = 4, JumpSand = 5, JumpSnow = 6, JumpWet = 7,
+                Climb = 8, ClimbLeft = 9, ClimbRight = 10, Fall = 11,
+                Swim = 12, Run = 13, Pipe = 14, Door = 15
+            );
+
+            Node* startingNode;
+            Node* endingNode;
+            f32 speed;
+            Animation::__type__ animation;
+            u8* unlockCriteria;
+        };
+    
+    public:
+        MapData(u8* data);
+
+        template <typename T>
+        T* fixRef(T*& indexAsPtr) {
+            u32 index = (u32)indexAsPtr;
+            if (index == 0xFFFFFFFF || index == 0) {
+                indexAsPtr = 0;
+            } else {
+                indexAsPtr = (T*)(((u8*)this) + index);
+            }
+            
+            return indexAsPtr;
+        }
+
+        Node* getNode(u32 index);
+
+        Header header;
+        WorldInfo worldInfo;
+        u32 nodeCount;
+        Node** nodes;
+        u32 pathCount;
+        Path** paths;
     };
 
     class Map : public MapActor {
@@ -103,6 +103,7 @@ namespace crt {
         ModelWrapper* model;
         ModelWrapper* bones;
         sead::Heap* sceneHeap;
+        MapData* map;
     };
 
 }

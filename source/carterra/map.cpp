@@ -3,10 +3,113 @@
 #include "dynlibs/os/functions.h"
 #include "game/resource/util.h"
 #include "sead/heapmgr.h"
+#include "sead/filedevice.h"
+#include "sead/filedevicemgr.h"
 #include "log.h"
 
 namespace crt {
     REGISTER_PROFILE(Map, ProfileID::CarterraMap);
+}
+
+static void findUnlockCriteriaSize(u8* unlockCriteria, u32& idx) {
+	u8 controlByte = unlockCriteria[idx++];
+	u8 conditionType = controlByte >> 6;
+
+	if (conditionType == 0) {
+		u8 subConditionType = (controlByte & 0x3F);
+		if (subConditionType < 4) {
+			idx += 2;
+        }
+	} else if (conditionType == 1) {
+		++idx;
+	} else if (conditionType == 2 || conditionType == 3) {
+		u8 termCount = (controlByte & 0x3F) + 1;
+		for (int i = 0; i < termCount; i++) {
+			findUnlockCriteriaSize(unlockCriteria, idx);
+		}
+	}
+}
+
+crt::MapData::MapData(u8* data) {
+	this->nodeCount = 0;
+	this->nodes = nullptr;
+	this->pathCount = 0;
+	this->paths = nullptr;
+
+	MapData* xdata = reinterpret_cast<crt::MapData*>(data);
+
+	this->header.magic = xdata->header.magic;
+	this->header.version = xdata->header.version;
+	this->header.mapID = xdata->header.mapID;
+
+	if (this->header.magic != MapData::MAGIC) {
+		PRINT("Invalid magic! Found: ", fmt::hex, this->header.magic, " Expected: ", fmt::hex, (u32)MapData::MAGIC);
+        return;
+    }
+
+	if (this->header.version != MapData::VERSION) {
+        PRINT("Invalid version! Found: ", fmt::hex, this->header.version, " Expected: ", fmt::hex, (u32)MapData::VERSION);
+		return;
+    }
+
+	this->worldInfo.worldID = xdata->worldInfo.worldID;
+	memcpy(&this->worldInfo.name, xdata->worldInfo.name, 32);
+	this->worldInfo.accentColor = xdata->worldInfo.accentColor;
+
+	this->nodeCount = xdata->nodeCount;
+	this->pathCount = xdata->pathCount;
+
+	xdata->fixRef(xdata->nodes);
+	xdata->fixRef(xdata->paths);
+
+	this->nodes = new Node*[this->nodeCount];
+	for (u32 i = 0; i < this->nodeCount; i++) {
+		xdata->fixRef(xdata->nodes[i]);
+
+		this->nodes[i] = new Node;
+		this->nodes[i]->type = xdata->nodes[i]->type;
+		memcpy(&this->nodes[i]->boneName, &xdata->nodes[i]->boneName, 32);
+
+		if (this->nodes[i]->type == MapData::Node::Type::Level) {
+			this->nodes[i]->level.levelID = xdata->nodes[i]->level.levelID;
+			this->nodes[i]->level.unlocksMapID = xdata->nodes[i]->level.unlocksMapID;
+		}
+	}
+
+	this->paths = new Path*[this->pathCount];
+	for (u32 i = 0; i < this->pathCount; i++) {
+		xdata->fixRef(xdata->paths[i]);
+
+		this->paths[i] = new Path;
+		xdata->fixRef(xdata->paths[i]->startingNode);
+		xdata->fixRef(xdata->paths[i]->endingNode);
+
+		this->paths[i]->startingNode = NULL;
+		for (u32 j = 0; j < this->nodeCount; j++) {
+			if (xdata->paths[i]->startingNode == xdata->nodes[j]) {
+				this->paths[i]->startingNode = this->nodes[j];
+            }
+        }
+
+		this->paths[i]->endingNode = NULL;
+		for (u32 j = 0; j < this->nodeCount; j++) {
+			if (xdata->paths[i]->endingNode == xdata->nodes[j]) {
+				this->paths[i]->endingNode = this->nodes[j];
+            }
+        }
+
+		this->paths[i]->speed = xdata->paths[i]->speed;
+		this->paths[i]->animation = xdata->paths[i]->animation;
+
+		xdata->fixRef(xdata->paths[i]->unlockCriteria);
+
+		u32 ucSize = 0;
+		u8* unlockCriteria = xdata->paths[i]->unlockCriteria;
+		findUnlockCriteriaSize(unlockCriteria, ucSize);
+
+		this->paths[i]->unlockCriteria = new u8[ucSize];
+		memcpy(this->paths[i]->unlockCriteria, unlockCriteria, ucSize);
+	}
 }
 
 Actor* crt::Map::build(const ActorBuildInfo* buildInfo) {
@@ -22,11 +125,31 @@ crt::Map::Map(const ActorBuildInfo* buildInfo)
     sead::HeapMgr::instance()->setCurrentHeap(this->sceneHeap);
 
     char name[32] = {0};
-    char path[64] = {0};
+    char modelPath[32] = {0};
+    char dataPath[32] = {0};
     __os_snprintf(name, 32, "CS_W%d", this->settings1);
-    __os_snprintf(path, 64, "course_res_pack/%s.szs", name);
+    __os_snprintf(modelPath, 64, "course_select/%s.szs", name);
+    __os_snprintf(dataPath, 64, "course_select/%s.a2ls", name);
 
-    loadResource(name, path);
+    loadResource(name, modelPath);
+
+    sead::FileHandle handle;
+    sead::FileDeviceMgr::instance()->tryOpen(&handle, dataPath, sead::FileDevice::FileOpenFlag_ReadOnly, 0);
+
+    u32 fileSize = handle.getFileSize();
+
+    u8* data = (u8*)this->sceneHeap->tryAlloc(fileSize, sead::FileDevice::sBufferMinAlignment);
+
+    if (data == nullptr) {
+        PRINT("Failed to allocate memory for map: ", dataPath);
+        return;
+    }
+
+    u32 bytesRead = handle.read(data, fileSize);
+
+    this->map = new MapData(data);
+
+    delete[] data;
 }
 
 u32 crt::Map::onCreate() {
