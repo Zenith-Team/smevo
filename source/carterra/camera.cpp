@@ -1,14 +1,11 @@
-#include "tsuru/carterra/camera.h"
-#include "tsuru/carterra/scene.h"
-#include "tsuru/carterra/map.h"
+#include "sme/carterra/camera.h"
+#include "sme/carterra/scene.h"
+#include "sme/carterra/map.h"
+#include "sme/carterra/player.h"
 #include "log.h"
 
 namespace crt {
     REGISTER_PROFILE(Camera, ProfileID::CarterraCamera);
-}
-
-Actor* crt::Camera::build(const ActorBuildInfo* buildInfo) {
-    return new Camera(buildInfo);
 }
 
 crt::Camera::Camera(const ActorBuildInfo* buildInfo)
@@ -18,8 +15,8 @@ crt::Camera::Camera(const ActorBuildInfo* buildInfo)
 { }
 
 u32 crt::Camera::onExecute() {
-    this->camera.pos = this->position;
-    this->camera.at = crt::Scene::instance()->map->getBonePos("W401");
+    this->camera.pos = crt::Scene::instance()->player->position + Vec3f(0.0f, 200.0f, 200.0f);
+    this->camera.at = crt::Scene::instance()->player->position;
 
     this->camera.doUpdateMatrix(&this->camera.matrix);
 

@@ -1,9 +1,9 @@
-#include "tsuru/carterra/scene.h"
-#include "tsuru/carterra/camera.h"
-#include "tsuru/carterra/map.h"
+#include "sme/carterra/scene.h"
+#include "sme/carterra/camera.h"
+#include "sme/carterra/map.h"
+#include "sme/carterra/player.h"
 #include "tsuru/debug/debugscene.h"
 #include "game/actor/actormgr.h"
-#include "game/task/taskmgr.h"
 #include "sead/heapmgr.h"
 #include "log.h"
 
@@ -37,8 +37,10 @@ void crt::Scene::prepare() {
         return ActorMgr::instance()->create(buildInfo);
     ) spawnActor;
 
-    this->camera = static_cast<crt::Camera*>(spawnActor(ProfileID::CarterraCamera));
     this->map = static_cast<crt::Map*>(spawnActor(ProfileID::CarterraMap, 4, (u32)sead::HeapMgr::instance()->getCurrentHeap()));
+    this->player = static_cast<crt::Player*>(spawnActor(ProfileID::CarterraPlayer));
+    this->player->position = this->map->getBonePos(this->map->map->nodes[0]->boneName);
+    this->camera = static_cast<crt::Camera*>(spawnActor(ProfileID::CarterraCamera));
 
     this->renderer.init(this->camera);
 
@@ -53,36 +55,4 @@ void crt::Scene::enter() {
 
 void crt::Scene::calc() {
     ActorMgr::instance()->executeActors();
-
-    if (this->controllers.buttonDown(InputControllers::ControllerID::Gamepad)) {
-        this->camera->position.x -= 1;
-    }
-
-    if (this->controllers.buttonUp(InputControllers::ControllerID::Gamepad)) {
-        this->camera->position.x += 1;
-    }
-
-    if (this->controllers.buttonLeft(InputControllers::ControllerID::Gamepad)) {
-        this->camera->position.z -= 1;
-    }
-
-    if (this->controllers.buttonRight(InputControllers::ControllerID::Gamepad)) {
-        this->camera->position.z += 1;
-    }
-
-    if (this->controllers.buttonPlus(InputControllers::ControllerID::Gamepad)) {
-        this->camera->position.y += 1;
-    }
-
-    if (this->controllers.buttonMinus(InputControllers::ControllerID::Gamepad)) {
-        this->camera->position.y -= 1;
-    }
-
-    if (this->controllers.buttonA(InputControllers::ControllerID::Gamepad)) {
-        sead::TaskClassID debugScene;
-        debugScene.type = sead::TaskClassID::Type_Factory;
-        debugScene.id.factory = &DebugScene::construct;
-        
-        TaskMgr::instance()->changeTask(this, debugScene);
-    }
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "game/graphics/model/modelnw.h"
-#include "tsuru/carterra/mapactor.h"
+#include "sme/carterra/mapactor.h"
 
 namespace crt {
 
@@ -91,8 +91,6 @@ namespace crt {
     public:
         Map(const ActorBuildInfo* buildInfo);
         virtual ~Map() { }
-
-        static Actor* build(const ActorBuildInfo* buildInfo);
 
         u32 onCreate() override;
         u32 onDraw() override;

@@ -1,5 +1,5 @@
-#include "tsuru/carterra/renderer.h"
-#include "tsuru/carterra/camera.h"
+#include "sme/carterra/renderer.h"
+#include "sme/carterra/camera.h"
 #include "agl/lyr/renderer.h"
 #include "game/graphics/layer/renderobjlayer.h"
 #include "game/actor/actormgr.h"

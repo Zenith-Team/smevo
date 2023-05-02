@@ -1,13 +1,14 @@
 #pragma once
 
 #include "sead/task.h"
-#include "tsuru/carterra/renderer.h"
+#include "sme/carterra/renderer.h"
 #include "tsuru/inputcontrollers.h"
 
 namespace crt {
 
     class Camera;
     class Map;
+    class Player;
 
     class Scene : public sead::CalculateTask {
         SEAD_RTTI_OVERRIDE_IMPL(Scene, sead::CalculateTask);
@@ -27,9 +28,12 @@ namespace crt {
         friend class Camera;
 
         Renderer renderer;
+        crt::Camera* camera;
+        crt::Player* player;
+
+    public:
         InputControllers controllers;
-        Camera* camera;
-        Map* map;
+        crt::Map* map;
     };
 
 }

@@ -5,6 +5,7 @@ Files:
   - carterra/renderer.cpp
   - carterra/camera.cpp
   - carterra/map.cpp
+  - carterra/player.cpp
 Hooks:
   # Entry point
   - type: branch

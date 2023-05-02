@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tsuru/carterra/mapactor.h"
+#include "sme/carterra/mapactor.h"
 #include "sead/camera.h"
 #include "sead/projection.h"
 #include "game/graphics/model/modelnw.h"
@@ -13,8 +13,6 @@ namespace crt {
     public:
         Camera(const ActorBuildInfo* buildInfo);
         virtual ~Camera() { }
-
-        static Actor* build(const ActorBuildInfo* buildInfo);
 
         u32 onExecute() override;
 

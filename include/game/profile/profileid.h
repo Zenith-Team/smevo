@@ -301,6 +301,7 @@ ENUM_CLASS(ProfileID,
 
     CarterraCamera,
     CarterraMap,
+    CarterraPlayer,
 
     Num
 );

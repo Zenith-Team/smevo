@@ -1,5 +1,5 @@
-#include "tsuru/carterra/map.h"
-#include "tsuru/carterra/scene.h"
+#include "sme/carterra/map.h"
+#include "sme/carterra/scene.h"
 #include "dynlibs/os/functions.h"
 #include "game/resource/util.h"
 #include "sead/heapmgr.h"
@@ -84,14 +84,14 @@ crt::MapData::MapData(u8* data) {
 		xdata->fixRef(xdata->paths[i]->startingNode);
 		xdata->fixRef(xdata->paths[i]->endingNode);
 
-		this->paths[i]->startingNode = NULL;
+		this->paths[i]->startingNode = nullptr;
 		for (u32 j = 0; j < this->nodeCount; j++) {
 			if (xdata->paths[i]->startingNode == xdata->nodes[j]) {
 				this->paths[i]->startingNode = this->nodes[j];
             }
         }
 
-		this->paths[i]->endingNode = NULL;
+		this->paths[i]->endingNode = nullptr;
 		for (u32 j = 0; j < this->nodeCount; j++) {
 			if (xdata->paths[i]->endingNode == xdata->nodes[j]) {
 				this->paths[i]->endingNode = this->nodes[j];
@@ -110,10 +110,6 @@ crt::MapData::MapData(u8* data) {
 		this->paths[i]->unlockCriteria = new u8[ucSize];
 		memcpy(this->paths[i]->unlockCriteria, unlockCriteria, ucSize);
 	}
-}
-
-Actor* crt::Map::build(const ActorBuildInfo* buildInfo) {
-    return new Map(buildInfo);
 }
 
 crt::Map::Map(const ActorBuildInfo* buildInfo)
@@ -168,11 +164,11 @@ u32 crt::Map::onCreate() {
     mtx.makeRTIdx(0, this->position);
 
     this->bones->setMtx(mtx);
-    this->bones->setScale(0.1);
+    this->bones->setScale(0.1f);
     this->bones->updateModel();
 
     this->model->setMtx(mtx);
-    this->model->setScale(0.1);
+    this->model->setScale(0.1f);
     this->model->updateModel();
 
     return 1;
