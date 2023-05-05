@@ -1,6 +1,7 @@
 #include "sme/carterra/player.h"
 #include "sme/carterra/scene.h"
 #include "game/task/taskmgr.h"
+#include "tsuru/save/managers/tsurusavemgr.h"
 #include "log.h"
 
 namespace crt {
@@ -61,7 +62,8 @@ void crt::Player::executeState_Idle() {
     MapData* map = crt::Scene::instance()->map->map;
 
     if (controllers->buttonA(ctrl) && this->currentNode->type == MapData::Node::Type::Level) {
-        TaskMgr::instance()->startLevel(crt::Scene::instance(), crt::Scene::instance()->map->settings1-1, this->currentNode->level.levelID-1);
+        TsuruSaveMgr::sSaveData.invincibilityEnabled = true;
+        TaskMgr::instance()->startLevel(crt::Scene::instance(), 1, this->currentNode->level.levelID-1);
     }
 
     if (controllers->buttonRight(ctrl) || controllers->buttonUp(ctrl) || controllers->buttonLeft(ctrl) || controllers->buttonDown(ctrl)) {

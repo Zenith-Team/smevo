@@ -27,7 +27,7 @@ namespace crt {
     private:
         friend class Camera;
 
-        Renderer renderer;
+        crt::Renderer renderer;
         crt::Camera* camera;
         crt::Player* player;
 
