@@ -945,7 +945,7 @@ u32 Profile::spriteToProfileList[] = {
     ProfileID::FloatyGoomba,                // 850
     ProfileID::NPC,                         // 851
     ProfileID::Wingo,                       // 852
-    ProfileID::NullActor,                   // 853
+    ProfileID::PiranhaSprout,               // 853
     ProfileID::NullActor,                   // 854
     ProfileID::NullActor,                   // 855
     ProfileID::NullActor,                   // 856

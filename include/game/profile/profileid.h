@@ -298,6 +298,8 @@ ENUM_CLASS(ProfileID,
     FloatyGoomba,
     NPC,
     Wingo,
+    PiranhaSprout,
+    PiranhaSproutProjectile,
 
     CarterraCamera,
     CarterraMap,

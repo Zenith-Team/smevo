@@ -122,7 +122,7 @@ bool FloatyGoomba::collisionGroundPound(HitboxCollider* hcSelf, HitboxCollider* 
         hcOther->owner->speed.y = 4.0f;
         playSound(SoundEffects::SE_PLY_RIDE_CLOUD, this->position);
         
-        return;
+        return false;
     }
 
     if (this->model) {

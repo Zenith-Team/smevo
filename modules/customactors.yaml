@@ -51,6 +51,7 @@ Files:
   - actors/floatygoomba.cpp
   - actors/npc.cpp
   - actors/wingo.cpp
+  - actors/piranhasprout.cpp
 #* Course Select Actors:
   - actors/csrootspawner.cpp
   - actors/csflames.cpp
