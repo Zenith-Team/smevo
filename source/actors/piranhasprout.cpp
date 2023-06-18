@@ -112,7 +112,9 @@ u32 PiranhaSprout::onExecute() {
 
     this->model->model->getBoneWorldMatrix(this->model->model->searchBoneIndex("Crest"), &mtx);
     Vec3f bonePos(mtx.m[0][3], mtx.m[1][3], mtx.m[2][3]);
-    this->hitboxCollider.colliderInfo.offset = Vec2f(bonePos.x - this->position.x, bonePos.y - this->position.y - 6.5f);
+
+    const f32 sign = this->eventID1 >> 0x4 & 0x1 ? -1.0f : 1.0f;
+    this->hitboxCollider.colliderInfo.offset = Vec2f(bonePos.x - this->position.x, bonePos.y - this->position.y - (6.5f * sign));
     
     return 1;
 }
@@ -197,7 +199,8 @@ void PiranhaSprout::beginState_Die() {
 void PiranhaSprout::executeState_Die() {
     if ((this->model->sklAnims[0]->frameCtrl.currentFrame / this->model->sklAnims[0]->frameCtrl.endFrame) >= 0.5f) {
         Vec3f effectPos(this->position.x, this->position.y, 4500.0f);
-        Effect::spawn(RP_Jugemu_CloudDisapp, &effectPos);
+        Vec3f effectScale = 0.5f;
+        Effect::spawn(RP_Jugemu_CloudDisapp, &effectPos, nullptr, &effectScale);
         this->isDeleted = true;
     }
 }
