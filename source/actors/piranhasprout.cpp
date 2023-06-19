@@ -224,6 +224,11 @@ u32 PiranhaSproutProjectile::onCreate() {
 
     this->model = ModelWrapper::create("nukubomb", "nukubomb");
 
+    PhysicsMgr::Sensor belowSensor = { -4, 4, -7 };
+    PhysicsMgr::Sensor sideSensor = { -4, 4, 7 };
+    PhysicsMgr::Sensor aboveSensor = { -4, 4, 7 };
+    this->physicsMgr.init(this, &belowSensor, &aboveSensor, &sideSensor);
+
     this->hitboxCollider.init(this, &PiranhaSproutProjectile::collisionInfo);
     this->addHitboxColliders();
 
@@ -241,16 +246,13 @@ u32 PiranhaSproutProjectile::onExecute() {
     this->position.x += sign;
     if (this->eventID1 >> 0x4 & 0x1) {
         this->position.y = pow2f(widthFraction * ((this->position.x - this->baseline.x) + (arcHeight * -sign))) + this->baseline.y - 2.0f * arcHeight;
-
-        if (this->position.y > this->baseline.y) {
-            return this->die();
-        }
     } else {
         this->position.y = -pow2f(widthFraction * ((this->position.x - this->baseline.x) + (arcHeight * -sign))) + this->baseline.y + 2.0f * arcHeight;
-    
-        if (this->position.y < this->baseline.y) {
-            return this->die();
-        }
+    }
+
+    this->physicsMgr.processCollisions();
+    if (this->physicsMgr.isCollidedLeft() || this->physicsMgr.isCollidedRight() || this->physicsMgr.isOnGround()) {
+        this->die();
     }
 
     Mtx34 mtx;
@@ -277,6 +279,7 @@ bool PiranhaSproutProjectile::collisionIceball(HitboxCollider* hcSelf, HitboxCol
 
 u32 PiranhaSproutProjectile::die() {
     Effect::spawn(RP_Block_break_chika, &this->position);
+    this->isDeleted = true;
     
     return 0;
 }
