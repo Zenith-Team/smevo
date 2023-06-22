@@ -300,6 +300,8 @@ ENUM_CLASS(ProfileID,
     Wingo,
     PiranhaSprout,
     PiranhaSproutProjectile,
+    PoisonPiranha,
+    PoisonPiranhaProjectile,
 
     CarterraCamera,
     CarterraMap,
