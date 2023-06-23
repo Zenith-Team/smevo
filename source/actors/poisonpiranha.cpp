@@ -18,6 +18,7 @@ public:
     u32 onDraw() override;
 
     void collisionEnemy(HitboxCollider* hcSelf, HitboxCollider* hcOther) override;
+    void collisionPlayer(HitboxCollider* hcSelf, HitboxCollider* hcOther) override;
     bool collisionIceball(HitboxCollider* hcSelf, HitboxCollider* hcOther) override;
     bool collisionGroundPound(HitboxCollider* hcSelf, HitboxCollider* hcOther);
 
@@ -28,6 +29,7 @@ public:
         ModelWrapper* puddle;
     } model;
     Vec2f baseline;
+    u32 timer;
 
     DECLARE_STATE(PoisonPiranhaProjectile, Ball);
     DECLARE_STATE(PoisonPiranhaProjectile, Puddle);
@@ -113,7 +115,7 @@ u32 PoisonPiranha::onDraw() {
 
 void PoisonPiranha::beginState_Idle() {
     this->model->setSklAnim("fire_wait_up", 10.0f);
-    this->timer = 240;
+    this->timer = 190;
 }
 
 void PoisonPiranha::executeState_Idle() {
@@ -144,7 +146,7 @@ void PoisonPiranha::executeState_Attack() {
             const f32 sign = this->direction == Direction::Left ? -1.0f : 1.0f;
 
             ActorBuildInfo buildInfo = { 0 };
-            buildInfo.position = this->position + Vec3f(10.0f * sign, -14.0f, 0.0f);
+            buildInfo.position = this->position + Vec3f(14.0f * sign, -20.0f, 0.0f);
             buildInfo.profile = Profile::get(ProfileID::PoisonPiranhaProjectile);
 
             static_cast<StageActor*>(ActorMgr::instance()->create(buildInfo))->direction = this->direction;
@@ -163,6 +165,7 @@ REGISTER_PROFILE(PoisonPiranhaProjectile, ProfileID::PoisonPiranhaProjectile);
 PoisonPiranhaProjectile::PoisonPiranhaProjectile(const ActorBuildInfo* buildInfo)
     : Enemy(buildInfo)
     , baseline(buildInfo->position.x, buildInfo->position.y)
+    , timer(600)
 { }
 
 u32 PoisonPiranhaProjectile::onCreate() {
@@ -200,6 +203,15 @@ u32 PoisonPiranhaProjectile::onExecute() {
     this->model.puddle->updateModel();
     this->model.puddle->updateAnimations();
 
+    if (this->timer == 0) {
+        this->isDeleted = true;
+        
+        Vec3f effectScale = 0.5f;
+        Effect::spawn(RP_Cmn_PoisonSplash_00, &this->position, nullptr, &effectScale);
+    } else {
+        this->timer--;
+    }
+
     return 1;
 }
 
@@ -217,6 +229,13 @@ void PoisonPiranhaProjectile::collisionEnemy(HitboxCollider* hcSelf, HitboxColli
     if (hcOther->owner->getProfileID() == ProfileID::PoisonPiranhaProjectile) {
         this->isDeleted = true;
     }
+}
+
+void PoisonPiranhaProjectile::collisionPlayer(HitboxCollider* hcSelf, HitboxCollider* hcOther) {
+    Vec3f effectScale = 0.5f;
+    Effect::spawn(RP_Cmn_PoisonSplash_00, &this->position, nullptr, &effectScale);
+
+    Enemy::collisionPlayer(hcSelf, hcOther);
 }
 
 bool PoisonPiranhaProjectile::collisionIceball(HitboxCollider* hcSelf, HitboxCollider* hcOther) {
