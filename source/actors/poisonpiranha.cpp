@@ -255,7 +255,6 @@ bool PoisonPiranhaProjectile::collisionGroundPound(HitboxCollider* hcSelf, Hitbo
 
 void PoisonPiranhaProjectile::beginState_Ball() {
     this->model.ball->playSklAnim("idle");
-    this->model.puddle->playSklAnim("idle");
 }
 
 void PoisonPiranhaProjectile::executeState_Ball() { 
@@ -277,6 +276,7 @@ void PoisonPiranhaProjectile::endState_Ball() { }
 /** STATE: Puddle */
 
 void PoisonPiranhaProjectile::beginState_Puddle() {
+    this->model.puddle->playSklAnim("idle");
     this->hitboxCollider.colliderInfo.shape = HitboxCollider::Shape::Rectangle;
     this->hitboxCollider.colliderInfo.radius = Vec2f(10.0f, 4.0f);
 
