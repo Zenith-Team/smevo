@@ -77,13 +77,12 @@ u32 FloatyGoomba::onExecute() {
 
     if (!this->onlyFloaty && this->model) {
         this->direction = this->directionToPlayerH(this->position);
-        sead::Mathu::chase(&this->rotation.y, Direction::directionToRotationList[this->direction], fixDeg(2.5f));
 
-        sead::Mathf::chase(&this->position.x, this->distanceToPlayer().x + this->position.x, 0.25f);
-
-        if (this->distanceToPlayer().length() > 4*16 || !this->model) {
+        if (this->distanceToPlayer().length() > 6.f*16.f || !this->model) {
             sead::Mathu::chase(&this->rotation.y, 0, fixDeg(1.25f));
-            return 1;
+        } else {
+            sead::Mathu::chase(&this->rotation.y, Direction::directionToRotationList[this->direction], fixDeg(2.5f));
+            sead::Mathf::chase(&this->position.x, this->distanceToPlayer().x + this->position.x, 0.25f);
         }
     }
 
