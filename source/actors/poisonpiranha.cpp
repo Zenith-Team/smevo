@@ -146,7 +146,7 @@ void PoisonPiranha::executeState_Attack() {
             const f32 sign = this->direction == Direction::Left ? -1.0f : 1.0f;
 
             ActorBuildInfo buildInfo = { 0 };
-            buildInfo.position = this->position + Vec3f(14.0f * sign, -20.0f, 0.0f);
+            buildInfo.position = this->position + Vec3f(14.0f * sign, -22.0f, 0.0f);
             buildInfo.profile = Profile::get(ProfileID::PoisonPiranhaProjectile);
 
             static_cast<StageActor*>(ActorMgr::instance()->create(buildInfo))->direction = this->direction;

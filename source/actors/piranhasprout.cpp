@@ -169,7 +169,7 @@ void PiranhaSprout::beginState_Attack() {
 void PiranhaSprout::executeState_Attack() {
     if (this->model->sklAnims[1]->frameCtrl.currentFrame == 39.0f && this->timer == 20) {
         ActorBuildInfo buildInfo = { 0 };
-        buildInfo.position = this->position + Vec3f(this->direction == Direction::Right ? 16.0f : -16.0f, -13.0f, 4000.0f);
+        buildInfo.position = this->position + Vec3f(this->direction == Direction::Right ? 14.0f : -14.0f, (this->eventID1 >> 0x4 & 0x1) ? 16.0f : -16.0f, 4000.0f);
         buildInfo.eventID1 = this->eventID1;
         buildInfo.profile = Profile::get(ProfileID::PiranhaSproutProjectile);
         
