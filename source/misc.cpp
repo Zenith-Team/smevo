@@ -35,3 +35,9 @@ PROFILE_RESOURCES(0x135, Profile::LoadResourcesAt::Course, "kuribo");
 REGISTER_PROFILE(Actor, Profile::spriteToProfileList[479]);
 PROFILE_RESOURCES(Profile::spriteToProfileList[479], Profile::LoadResourcesAt::Course, "kuribo");
 #endif
+
+void setProjectileSpeed(StageActor* projectile)
+{
+    if (projectile->settings2 != 0)
+        projectile->speed.y = 5.0f;
+}

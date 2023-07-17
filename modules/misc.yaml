@@ -62,3 +62,17 @@ Hooks:
     data: "38600000" # li r3, 0
   - type: nop
     addr: "0x0202b104"
+
+# Player projectile upwards throw
+  - type: branch
+    instr: bl
+    addr: "0x0293ae98" # Player::throwProjectile
+    func: IsPlayerUp
+  - type: branch
+    instr: bl
+    addr: "0x021701c4" # Fireball::oncreate
+    func: PlayerProjectileSpeed
+  - type: branch
+    instr: bl
+    addr: "0x0217fcb4" # Iceball::oncreate
+    func: PlayerProjectileSpeed
