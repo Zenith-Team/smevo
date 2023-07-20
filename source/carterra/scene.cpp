@@ -2,7 +2,6 @@
 #include "sme/carterra/camera.h"
 #include "sme/carterra/map.h"
 #include "sme/carterra/player.h"
-#include "tsuru/debug/debugscene.h"
 #include "game/actor/actormgr.h"
 #include "sead/heapmgr.h"
 #include "log.h"

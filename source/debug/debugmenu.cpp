@@ -7,6 +7,7 @@
 #include "game/task/courseselecttask.h"
 #include "game/task/coursetask.h"
 #include "game/level/levelinfo.h"
+#include "sme/carterra/scene.h"
 #include "log.h"
 
 #include "imgui/imgui.h"
@@ -172,6 +173,8 @@ static void drawLvlEntry() {
             currentTask = CourseSelectTask::instance();
         } else if (CourseTask::instance()) {
             currentTask = CourseTask::instance();
+        } else if (crt::Scene::instance()) {
+            currentTask = crt::Scene::instance();
         }
 
         if (ImGui::Button("Play")) {
