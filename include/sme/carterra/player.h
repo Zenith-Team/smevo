@@ -2,7 +2,7 @@
 
 #include "sme/carterra/mapactor.h"
 #include "sme/carterra/map.h"
-#include "game/graphics/model/modelnw.h"
+#include "game/graphics/model/charactermodelmgr.h"
 #include "game/states.h"
 
 namespace crt {
@@ -18,7 +18,7 @@ namespace crt {
         u32 onExecute() override;
         u32 onDraw() override;
 
-        ModelWrapper* model;
+        PlayerModelMgr model;
         MapData::Node* currentNode;
         MapData::Path* currentPath;
         MultiStateWrapper<crt::Player> states;

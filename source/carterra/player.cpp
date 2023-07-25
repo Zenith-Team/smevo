@@ -16,14 +16,13 @@ PROFILE_RESOURCES(ProfileID::CarterraPlayer, Profile::LoadResourcesAt::CourseSel
 
 crt::Player::Player(const ActorBuildInfo* buildInfo)
     : MapActor(buildInfo)
-    , model(nullptr)
+    , model(0, 1, 0, true)
     , currentNode(nullptr)
     , currentPath(nullptr)
     , states(this)
 { }
 
 u32 crt::Player::onCreate() {
-    this->model = ModelWrapper::create("MarioMdl", "MB_model");
     this->currentNode = crt::Scene::instance()->map->map->nodes[0];
     
     this->states.changeState(&crt::Player::StateID_Idle);
@@ -35,11 +34,10 @@ u32 crt::Player::onExecute() {
     this->states.execute();
 
     Mtx34 mtx;
-    mtx.makeRTIdx(this->rotation, this->position);
+    mtx.makeSRTIdx(0.3f, this->rotation, this->position);
     
-    this->model->setMtx(mtx);
-    this->model->setScale(0.25f);
-    this->model->updateModel();
+    this->model.modelPtr->setMtx(mtx);
+    this->model.modelPtr->update();
 
     sead::Mathu::chase(&this->rotation.y, fixDeg(this->targetRotation), fixDeg(10.0f));
 
@@ -47,7 +45,7 @@ u32 crt::Player::onExecute() {
 }
 
 u32 crt::Player::onDraw() {
-    this->model->draw();
+    this->model.draw();
     
     return 1;
 }
