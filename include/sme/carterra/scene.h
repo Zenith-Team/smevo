@@ -23,17 +23,12 @@ namespace crt {
         void prepare() override;
         void enter() override;
         void calc() override;
-    
-    private:
-        friend class Camera;
 
         crt::Renderer renderer;
         crt::Camera* camera;
         crt::Player* player;
-
-    public:
-        InputControllers controllers;
         crt::Map* map;
+        InputControllers controllers;
     };
 
 }

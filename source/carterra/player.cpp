@@ -1,5 +1,6 @@
 #include "sme/carterra/player.h"
 #include "sme/carterra/scene.h"
+#include "sme/carterra/camera.h"
 #include "game/task/taskmgr.h"
 #include "tsuru/save/managers/tsurusavemgr.h"
 #include "log.h"
@@ -62,6 +63,11 @@ void crt::Player::executeState_Idle() {
     MapData* map = crt::Scene::instance()->map->map;
 
     if (controllers->buttonA(ctrl) && this->currentNode->type == MapData::Node::Type::Level) {
+        Vec2f faderPos;
+        const sead::Viewport vp(0.0f, 0.0f, 1280.0f, 720.0f);
+        crt::Scene::instance()->camera->camera.projectByMatrix(&faderPos, this->position, crt::Scene::instance()->camera->projection, vp);
+        TaskMgr::instance()->faderPos = faderPos;
+
         TaskMgr::instance()->startLevel(crt::Scene::instance(), 1, this->currentNode->level.levelID-1);
     }
 
