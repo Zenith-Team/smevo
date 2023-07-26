@@ -15,7 +15,7 @@ namespace crt {
 
 crt::Player::Player(const ActorBuildInfo* buildInfo)
     : MapActor(buildInfo)
-    , model(0, 1, 0, true)
+    , modelMario(0, 1, 0, true)
     , currentNode(nullptr)
     , currentPath(nullptr)
     , states(this)
@@ -35,8 +35,8 @@ u32 crt::Player::onExecute() {
     Mtx34 mtx;
     mtx.makeSRTIdx(0.25f, this->rotation, this->position);
     
-    this->model.playerModel->setMtx(mtx);
-    this->model.playerModel->update();
+    this->modelMario.playerModel->setMtx(mtx);
+    this->modelMario.playerModel->update();
 
     sead::Mathu::chase(&this->rotation.y, fixDeg(this->targetRotation), fixDeg(10.0f));
 
@@ -44,7 +44,7 @@ u32 crt::Player::onExecute() {
 }
 
 u32 crt::Player::onDraw() {
-    this->model.draw();
+    this->modelMario.draw();
     
     return 1;
 }
@@ -52,7 +52,7 @@ u32 crt::Player::onDraw() {
 /** STATE: Idle */
 
 void crt::Player::beginState_Idle() {
-    this->model.playAnim(CharacterModelMgr::Animation::CSIdle);
+    this->modelMario.playAnim(CharacterModelMgr::Animation::CSIdle);
 }
 
 void crt::Player::executeState_Idle() {
@@ -116,7 +116,7 @@ void crt::Player::endState_Idle() { }
 /** STATE: Walk */
 
 void crt::Player::beginState_Walk() {
-    this->model.playAnim(CharacterModelMgr::Animation::Run);
+    this->modelMario.playAnim(CharacterModelMgr::Animation::Run);
 }
 
 void crt::Player::executeState_Walk() {
@@ -125,9 +125,9 @@ void crt::Player::executeState_Walk() {
     Vec3f nodeDir = targetPos - this->position;
     nodeDir.normalize();
 
-    this->position += nodeDir * 0.4f;
+    this->position += nodeDir * this->currentPath->speed * 0.4f;
 
-    if (this->position.distanceTo(targetPos) < 0.1f) {
+    if (this->position.distanceTo(targetPos) < (0.2f * this->currentPath->speed)) {
         if (otherNode->type == MapData::Node::Type::Passthrough) {
             MapData::Path* nextPath = this->currentPath;
 
@@ -160,7 +160,7 @@ void crt::Player::endState_Walk() { }
 /** STATE: EnterLevel */
 
 void crt::Player::beginState_EnterLevel() {
-    this->model.playAnim(CharacterModelMgr::Animation::CSEnterLevel);
+    this->modelMario.playAnim(CharacterModelMgr::Animation::CSEnterLevel);
 
     this->targetRotation = 0;
 }

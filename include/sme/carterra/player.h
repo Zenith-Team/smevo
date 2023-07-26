@@ -18,7 +18,7 @@ namespace crt {
         u32 onExecute() override;
         u32 onDraw() override;
 
-        PlayerModelMgr model;
+        PlayerModelMgr modelMario;
         MapData::Node* currentNode;
         MapData::Path* currentPath;
         MultiStateWrapper<crt::Player> states;
