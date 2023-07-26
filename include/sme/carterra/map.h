@@ -75,8 +75,6 @@ namespace crt {
             return indexAsPtr;
         }
 
-        Node* getNode(u32 index);
-
         Header header;
         WorldInfo worldInfo;
         u32 nodeCount;
@@ -97,6 +95,7 @@ namespace crt {
         u32 onDelete() override;
 
         Vec3f getBonePos(const sead::SafeString& boneName);
+        MapData::Node* getNode(const sead::SafeString& name);
     
         ModelWrapper* model;
         ModelWrapper* bones;

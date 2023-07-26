@@ -193,3 +193,15 @@ Vec3f crt::Map::getBonePos(const sead::SafeString& name) {
 
     return Vec3f(mtx.m[0][3], mtx.m[1][3], mtx.m[2][3]);
 }
+
+crt::MapData::Node* crt::Map::getNode(const sead::SafeString& name) {
+	for (u32 i = 0; i < this->map->nodeCount; i++) {
+		if (strcmp(name.cstr(), this->map->nodes[i]->boneName)) {
+			return this->map->nodes[i];
+		}
+	}
+
+	PRINT("ERROR: Unable to find node: ", name.cstr());
+
+	return nullptr;
+}

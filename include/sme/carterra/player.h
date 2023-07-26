@@ -26,6 +26,7 @@ namespace crt {
 
         DECLARE_STATE(Player, Idle);
         DECLARE_STATE(Player, Walk);
+        DECLARE_STATE(Player, EnterLevel);
     };
 
 }

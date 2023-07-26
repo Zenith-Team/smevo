@@ -10,9 +10,8 @@ namespace crt {
 
     CREATE_STATE(Player, Idle);
     CREATE_STATE(Player, Walk);
+    CREATE_STATE(Player, EnterLevel);
 }
-
-PROFILE_RESOURCES(ProfileID::CarterraPlayer, Profile::LoadResourcesAt::CourseSelect, "MarioMdl");
 
 crt::Player::Player(const ActorBuildInfo* buildInfo)
     : MapActor(buildInfo)
@@ -34,7 +33,7 @@ u32 crt::Player::onExecute() {
     this->states.execute();
 
     Mtx34 mtx;
-    mtx.makeSRTIdx(0.3f, this->rotation, this->position);
+    mtx.makeSRTIdx(0.25f, this->rotation, this->position);
     
     this->model.playerModel->setMtx(mtx);
     this->model.playerModel->update();
@@ -52,7 +51,9 @@ u32 crt::Player::onDraw() {
 
 /** STATE: Idle */
 
-void crt::Player::beginState_Idle() { }
+void crt::Player::beginState_Idle() {
+    this->model.playAnim(CharacterModelMgr::Animation::CSIdle);
+}
 
 void crt::Player::executeState_Idle() {
     InputControllers* controllers = &crt::Scene::instance()->controllers;
@@ -61,12 +62,7 @@ void crt::Player::executeState_Idle() {
     MapData* map = crt::Scene::instance()->map->map;
 
     if (controllers->buttonA(ctrl) && this->currentNode->type == MapData::Node::Type::Level) {
-        Vec2f faderPos;
-        const sead::Viewport vp(0.0f, 0.0f, 1280.0f, 720.0f);
-        crt::Scene::instance()->camera->camera.projectByMatrix(&faderPos, this->position, crt::Scene::instance()->camera->projection, vp);
-        TaskMgr::instance()->faderPos = faderPos;
-
-        TaskMgr::instance()->startLevel(crt::Scene::instance(), 1, this->currentNode->level.levelID-1);
+        this->states.changeState(&StateID_EnterLevel);
     }
 
     if (controllers->buttonRight(ctrl) || controllers->buttonUp(ctrl) || controllers->buttonLeft(ctrl) || controllers->buttonDown(ctrl)) {
@@ -119,7 +115,9 @@ void crt::Player::endState_Idle() { }
 
 /** STATE: Walk */
 
-void crt::Player::beginState_Walk() { }
+void crt::Player::beginState_Walk() {
+    this->model.playAnim(CharacterModelMgr::Animation::Run);
+}
 
 void crt::Player::executeState_Walk() {
     MapData::Node* otherNode = this->currentPath->startingNode == this->currentNode ? this->currentPath->endingNode : this->currentPath->startingNode;
@@ -158,3 +156,28 @@ void crt::Player::executeState_Walk() {
 }
 
 void crt::Player::endState_Walk() { }
+
+/** STATE: EnterLevel */
+
+void crt::Player::beginState_EnterLevel() {
+    this->model.playAnim(CharacterModelMgr::Animation::CSEnterLevel);
+
+    this->targetRotation = 0;
+}
+
+void crt::Player::executeState_EnterLevel() {
+    static int i = 60;
+
+    if (--i == 0) {
+        i = 60;
+
+        Vec2f faderPos;
+        const sead::Viewport vp(0.0f, 0.0f, 1280.0f, 720.0f);
+        crt::Scene::instance()->camera->camera.projectByMatrix(&faderPos, this->position, crt::Scene::instance()->camera->projection, vp);
+        TaskMgr::instance()->faderPos = faderPos;
+
+        TaskMgr::instance()->startLevel(crt::Scene::instance(), 1, this->currentNode->level.levelID-1);
+    }
+}
+
+void crt::Player::endState_EnterLevel() { }
