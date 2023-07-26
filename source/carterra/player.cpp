@@ -36,8 +36,8 @@ u32 crt::Player::onExecute() {
     Mtx34 mtx;
     mtx.makeSRTIdx(0.3f, this->rotation, this->position);
     
-    this->model.modelPtr->setMtx(mtx);
-    this->model.modelPtr->update();
+    this->model.playerModel->setMtx(mtx);
+    this->model.playerModel->update();
 
     sead::Mathu::chase(&this->rotation.y, fixDeg(this->targetRotation), fixDeg(10.0f));
 
