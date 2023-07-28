@@ -91,6 +91,7 @@ namespace crt {
         virtual ~Map() { }
 
         u32 onCreate() override;
+        u32 onExecute() override;
         u32 onDraw() override;
         u32 onDelete() override;
 
@@ -99,6 +100,7 @@ namespace crt {
     
         ModelWrapper* model;
         ModelWrapper* bones;
+        ModelWrapper* synchro;
         sead::Heap* sceneHeap;
         MapData* map;
     };

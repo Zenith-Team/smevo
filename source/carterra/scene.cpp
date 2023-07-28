@@ -36,7 +36,7 @@ void crt::Scene::prepare() {
         return ActorMgr::instance()->create(buildInfo);
     ) spawnActor;
 
-    this->map = static_cast<crt::Map*>(spawnActor(ProfileID::CarterraMap, 4, (u32)sead::HeapMgr::instance()->getCurrentHeap()));
+    this->map = static_cast<crt::Map*>(spawnActor(ProfileID::CarterraMap, 1, (u32)sead::HeapMgr::instance()->getCurrentHeap()));
     this->player = static_cast<crt::Player*>(spawnActor(ProfileID::CarterraPlayer));
     this->player->position = this->map->getBonePos(this->map->map->nodes[0]->boneName);
     this->camera = static_cast<crt::Camera*>(spawnActor(ProfileID::CarterraCamera));

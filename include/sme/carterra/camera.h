@@ -18,6 +18,8 @@ namespace crt {
 
         sead::LookAtCamera camera;
         sead::PerspectiveProjection projection;
+
+        Vec3f targetPos, targetAt;
     };
 
 }

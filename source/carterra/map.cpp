@@ -153,12 +153,17 @@ u32 crt::Map::onCreate() {
 
     char name[32] = {0};
     char terrainModelName[32] = {0};
+	char synchroModelName[32] = {0};
 
     __os_snprintf(name, 32, "CS_W%d", this->settings1);
     __os_snprintf(terrainModelName, 32, "CS_W%d_World", this->settings1);
+	__os_snprintf(synchroModelName, 32, "CS_W%d_Synchro", this->settings1);
 
     this->model = ModelWrapper::create(name, terrainModelName);
     this->bones = ModelWrapper::create(name, name);
+	this->synchro = ModelWrapper::create(name, synchroModelName, 1);
+
+	this->synchro->playSklAnim(synchroModelName);
 
     Mtx34 mtx;
     mtx.makeRTIdx(0, this->position);
@@ -171,18 +176,30 @@ u32 crt::Map::onCreate() {
     this->model->setScale(0.1f);
     this->model->updateModel();
 
+	this->synchro->setMtx(mtx);
+	this->synchro->setScale(0.1f);
+
     return 1;
+}
+
+u32 crt::Map::onExecute() {
+	this->synchro->updateAnimations();
+	this->synchro->updateModel();
+
+	return 1;
 }
 
 u32 crt::Map::onDraw() {
     this->model->draw();
-    
+	this->synchro->draw();
+
     return 1;
 }
 
 u32 crt::Map::onDelete() {
     delete this->model;
     delete this->bones;
+	delete this->synchro;
     
     return 1;
 }

@@ -2,6 +2,7 @@
 #include "sme/carterra/scene.h"
 #include "sme/carterra/camera.h"
 #include "game/task/taskmgr.h"
+#include "game/globalstatekeeper.h"
 #include "tsuru/save/managers/tsurusavemgr.h"
 #include "log.h"
 
@@ -26,7 +27,7 @@ u32 crt::Player::onCreate() {
     
     this->states.changeState(&crt::Player::StateID_Idle);
 
-    return 1;
+    return this->onExecute();
 }
 
 u32 crt::Player::onExecute() {
@@ -125,7 +126,7 @@ void crt::Player::executeState_Walk() {
     Vec3f nodeDir = targetPos - this->position;
     nodeDir.normalize();
 
-    this->position += nodeDir * this->currentPath->speed * 0.4f;
+    this->position += nodeDir * this->currentPath->speed * 0.5f;
 
     if (this->position.distanceTo(targetPos) < (0.2f * this->currentPath->speed)) {
         if (otherNode->type == MapData::Node::Type::Passthrough) {
@@ -176,7 +177,13 @@ void crt::Player::executeState_EnterLevel() {
         crt::Scene::instance()->camera->camera.projectByMatrix(&faderPos, this->position, crt::Scene::instance()->camera->projection, vp);
         TaskMgr::instance()->faderPos = faderPos;
 
-        TaskMgr::instance()->startLevel(crt::Scene::instance(), 1, this->currentNode->level.levelID-1);
+        GlobalStateKeeper* gs = GlobalStateKeeper::instance();
+        
+        // Level numbers used for name text
+        gs->_1A8 = this->currentNode->level.levelID-1;
+        gs->_1B8 = this->currentNode->level.levelID-1;
+
+        TaskMgr::instance()->startLevel(crt::Scene::instance(), crt::Scene::instance()->map->map->worldInfo.worldID-1, this->currentNode->level.levelID-1);
     }
 }
 
