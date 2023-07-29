@@ -3,7 +3,8 @@
 #include "sme/carterra/camera.h"
 #include "game/task/taskmgr.h"
 #include "game/globalstatekeeper.h"
-#include "tsuru/save/managers/tsurusavemgr.h"
+#include "game/savemgr.h"
+#include "tsuru/save/managers/crtsavemgr.h"
 #include "log.h"
 #include "imgui/imgui.h"
 
@@ -24,8 +25,9 @@ crt::Player::Player(const ActorBuildInfo* buildInfo)
 { }
 
 u32 crt::Player::onCreate() {
-    this->currentNode = crt::Scene::instance()->map->map->nodes[0];
-    
+    this->currentNode = crt::Scene::instance()->map->map->nodes[CarterraSaveMgr::sSaveData.saveSlots[SaveMgr::instance()->saveData->header.lastSessionSaveSlot].lastNode];
+    this->position = crt::Scene::instance()->map->getBonePos(this->currentNode->boneName);
+
     this->states.changeState(&crt::Player::StateID_Idle);
 
     return this->onExecute();
@@ -169,7 +171,17 @@ void crt::Player::executeState_Walk() {
     }
 }
 
-void crt::Player::endState_Walk() { }
+void crt::Player::endState_Walk() {
+    // Find the index of the current node in the map's node array
+    u32 i = 0;
+    for (; i < crt::Scene::instance()->map->map->nodeCount; i++) {
+        if (crt::Scene::instance()->map->map->nodes[i] == this->currentNode) {
+            break;
+        }
+    }
+
+    CarterraSaveMgr::sSaveData.saveSlots[SaveMgr::instance()->saveData->header.lastSessionSaveSlot].lastNode = i;
+}
 
 /** STATE: EnterLevel */
 

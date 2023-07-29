@@ -3,8 +3,10 @@
 #include "sme/carterra/map.h"
 #include "sme/carterra/player.h"
 #include "game/actor/actormgr.h"
+#include "game/savemgr.h"
 #include "sead/heapmgr.h"
 #include "tsuru/layoutrenderer.h"
+#include "tsuru/save/managers/crtsavemgr.h"
 #include "log.h"
 
 SEAD_SINGLETON_TASK_IMPL(crt::Scene);
@@ -47,9 +49,8 @@ void crt::Scene::prepare() {
         return ActorMgr::instance()->create(buildInfo);
     ) spawnActor;
 
-    this->map = static_cast<crt::Map*>(spawnActor(ProfileID::CarterraMap, 4, (u32)sead::HeapMgr::instance()->getCurrentHeap()));
+    this->map = static_cast<crt::Map*>(spawnActor(ProfileID::CarterraMap, CarterraSaveMgr::sSaveData.saveSlots[SaveMgr::instance()->saveData->header.lastSessionSaveSlot].lastMap, (u32)sead::HeapMgr::instance()->getCurrentHeap()));
     this->player = static_cast<crt::Player*>(spawnActor(ProfileID::CarterraPlayer));
-    this->player->position = this->map->getBonePos(this->map->map->nodes[0]->boneName);
     this->camera = static_cast<crt::Camera*>(spawnActor(ProfileID::CarterraCamera));
 
     //* Rendering
@@ -107,7 +108,9 @@ void crt::Scene::endState_Active() { }
 
 /** STATE: Menu */
 
-void crt::Scene::beginState_Menu() { }
+void crt::Scene::beginState_Menu() {
+    SaveMgr::instance()->thread->sendMessage(2, sead::MessageQueue::BlockType_NoBlock);
+}
 
 void crt::Scene::executeState_Menu() {
     if (this->controllers.buttonA(InputControllers::ControllerID::Gamepad)) {
