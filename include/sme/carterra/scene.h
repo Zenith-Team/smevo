@@ -4,6 +4,7 @@
 #include "sme/carterra/renderer.h"
 #include "tsuru/inputcontrollers.h"
 #include "game/layout/layoutcontainer.h"
+#include "game/states.h"
 
 namespace crt {
 
@@ -36,12 +37,16 @@ namespace crt {
         void enter() override;
         void calc() override;
 
+        MultiStateWrapper<Scene> states;
         crt::Renderer renderer;
         crt::Camera* camera;
         crt::Player* player;
         crt::Map* map;
         InputControllers controllers;
         MapUILayout uiLayout;
+
+        DECLARE_STATE(Scene, Active);
+        DECLARE_STATE(Scene, Menu);
     };
 
 }

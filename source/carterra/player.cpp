@@ -136,7 +136,7 @@ void crt::Player::executeState_Walk() {
 
     this->position += nodeDir * this->currentPath->speed * 0.5f;
 
-    if (this->position.distanceTo(targetPos) < (0.2f * this->currentPath->speed)) {
+    if (this->position.distanceTo(targetPos) < (0.4f * this->currentPath->speed)) {
         if (otherNode->type == MapData::Node::Type::Passthrough) {
             MapData::Path* nextPath = this->currentPath;
 

@@ -9,6 +9,11 @@
 
 SEAD_SINGLETON_TASK_IMPL(crt::Scene);
 
+namespace crt {
+    CREATE_STATE(Scene, Active);
+    CREATE_STATE(Scene, Menu);
+}
+
 crt::Scene::Scene(const sead::TaskConstructArg& arg)
     : sead::CalculateTask(arg, "CarterraScene")
     , renderer()
@@ -17,6 +22,7 @@ crt::Scene::Scene(const sead::TaskConstructArg& arg)
     , map(nullptr)
     , controllers()
     , uiLayout()
+    , states(this)
 { }
 
 crt::Scene::~Scene() {
@@ -49,6 +55,7 @@ void crt::Scene::prepare() {
     //* Rendering
 
     this->renderer.init(this->camera);
+
     LightMapMgr::instance()->setCSLightMaps();
 
     //* Input
@@ -73,11 +80,39 @@ void crt::Scene::prepare() {
 
 void crt::Scene::enter() {
     this->renderer.start();
+
+    this->states.changeState(&crt::Scene::StateID_Active);
 }
 
 void crt::Scene::calc() {
+    this->states.execute();
+}
+
+/** STATE: Active */
+
+void crt::Scene::beginState_Active() { }
+
+void crt::Scene::executeState_Active() {
     ActorMgr::instance()->executeActors();
     
     this->uiLayout.update(0xE);
     LayoutRenderer::instance()->addLayout(this->uiLayout);
+
+    if (this->controllers.buttonPlus(InputControllers::ControllerID::Gamepad)) {
+        this->states.changeState(&crt::Scene::StateID_Menu);
+    }
 }
+
+void crt::Scene::endState_Active() { }
+
+/** STATE: Menu */
+
+void crt::Scene::beginState_Menu() { }
+
+void crt::Scene::executeState_Menu() {
+    if (this->controllers.buttonA(InputControllers::ControllerID::Gamepad)) {
+        this->states.changeState(&crt::Scene::StateID_Active);
+    }
+}
+
+void crt::Scene::endState_Menu() { }
