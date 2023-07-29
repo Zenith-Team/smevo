@@ -3,8 +3,9 @@
 #include "sme/carterra/map.h"
 #include "sme/carterra/player.h"
 #include "log.h"
+#include "imgui/imgui.h"
 
-static const Vec3f cameraOffset(0.0f, 150.0f, 200.0f);
+static const Vec3f cameraOffset(0.0f, 120.0f, 200.0f);
 
 namespace crt {
     REGISTER_PROFILE(Camera, ProfileID::CarterraCamera);
@@ -34,9 +35,9 @@ u32 crt::Camera::onExecute() {
         targetAtDelta = Vec3f(0.0f, 0.0f, 0.0f);
     }
 
-    f32 speed = this->camera.pos.distanceTo(this->targetPos) / 12.0f;
+    f32 speed = this->camera.pos.distanceTo(this->targetPos) / 8.0f;
     speed = speed < 0.2f ? 0.2f : speed;
-    speed = speed > 0.75f ? 0.75f : speed;
+    speed = speed > 0.8f ? 0.8f : speed;
 
     this->camera.pos += targetDelta * speed;
     this->camera.at += targetAtDelta * speed;

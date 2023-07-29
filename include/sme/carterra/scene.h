@@ -3,12 +3,24 @@
 #include "sead/task.h"
 #include "sme/carterra/renderer.h"
 #include "tsuru/inputcontrollers.h"
+#include "game/layout/layoutcontainer.h"
 
 namespace crt {
 
     class Camera;
     class Map;
     class Player;
+
+    class MapUILayout : public LayoutContainer {
+    public:
+        MapUILayout()
+            : LayoutContainer(this->animators, sizeof(this->animators) / sizeof(this->animators[0]))
+        { }
+
+        virtual ~MapUILayout() { }
+
+        LayoutAnimator animators[1];
+    };
 
     class Scene : public sead::CalculateTask {
         SEAD_RTTI_OVERRIDE_IMPL(Scene, sead::CalculateTask);
@@ -29,6 +41,7 @@ namespace crt {
         crt::Player* player;
         crt::Map* map;
         InputControllers controllers;
+        MapUILayout uiLayout;
     };
 
 }

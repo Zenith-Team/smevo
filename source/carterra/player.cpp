@@ -5,6 +5,7 @@
 #include "game/globalstatekeeper.h"
 #include "tsuru/save/managers/tsurusavemgr.h"
 #include "log.h"
+#include "imgui/imgui.h"
 
 namespace crt {
     REGISTER_PROFILE(Player, ProfileID::CarterraPlayer);
@@ -39,7 +40,7 @@ u32 crt::Player::onExecute() {
     this->modelMario.playerModel->setMtx(mtx);
     this->modelMario.playerModel->update();
 
-    sead::Mathu::chase(&this->rotation.y, fixDeg(this->targetRotation), fixDeg(10.0f));
+    sead::Mathu::chase(&this->rotation.y, fixDeg(this->targetRotation), fixDeg(20.0f));
 
     return 1;
 }
@@ -70,23 +71,20 @@ void crt::Player::executeState_Idle() {
         f32 angle;
 
         if (controllers->buttonLeft(ctrl)) {
-            angle = 0.0f;
-        }
-
-        if (controllers->buttonDown(ctrl)) {
-            angle = 90.0f;
-        }
-
-        if (controllers->buttonRight(ctrl)) {
-            angle = 180.0f;
-        }
-
-        if (controllers->buttonUp(ctrl)) {
             angle = 270.0f;
         }
 
-        MapData::Path* path = map->paths[0];
-        f32 prevAngle = 99999999.0f;
+        if (controllers->buttonDown(ctrl)) {
+            angle = 0.0f;
+        }
+
+        if (controllers->buttonRight(ctrl)) {
+            angle = 90.0f;
+        }
+
+        if (controllers->buttonUp(ctrl)) {
+            angle = 180.0f;
+        }
 
         for (u32 i = 0; i < map->pathCount; i++) {
             if (map->paths[i]->startingNode != this->currentNode && map->paths[i]->endingNode != this->currentNode) {
@@ -98,18 +96,28 @@ void crt::Player::executeState_Idle() {
 
             f32 otherNodeAngle = radToDeg(atan2f(otherNodePos.x - this->position.x, otherNodePos.z - this->position.z));
 
-            if (abs(angle - otherNodeAngle) < abs(angle - prevAngle)) {
-                path = map->paths[i];
-                prevAngle = otherNodeAngle;
+            if (otherNodeAngle < 0.0f) {
+                otherNodeAngle += 360.0f;
+            }
+
+            if (otherNodeAngle > 360.0f) {
+                otherNodeAngle -= 360.0f;
+            }
+
+            if (sead::Mathf::abs(angle - otherNodeAngle) < 80.0f) {
+                this->currentPath = map->paths[i];
+                this->targetRotation = otherNodeAngle;
+                break;
             }
         }
 
-        this->currentPath = path;
-        this->targetRotation = prevAngle;
-
-        this->states.changeState(&crt::Player::StateID_Walk); 
+        if (this->currentPath != nullptr) {
+            this->states.changeState(&crt::Player::StateID_Walk); 
+        } else {
+            this->targetRotation = angle;
+            this->rotation.y = fixDeg(angle);
+        }
     }
-
 }
 
 void crt::Player::endState_Idle() { }
@@ -117,7 +125,7 @@ void crt::Player::endState_Idle() { }
 /** STATE: Walk */
 
 void crt::Player::beginState_Walk() {
-    this->modelMario.playAnim(CharacterModelMgr::Animation::Run);
+    this->modelMario.playAnim(CharacterModelMgr::Animation::Run3);
 }
 
 void crt::Player::executeState_Walk() {
@@ -141,6 +149,11 @@ void crt::Player::executeState_Walk() {
 
                 if (checkPath->startingNode == otherNode || checkPath->endingNode == otherNode) {
                     nextPath = checkPath;
+
+                    MapData::Node* nextNode = nextPath->startingNode == otherNode ? nextPath->endingNode : nextPath->startingNode;
+                    Vec3f nextNodePos = crt::Scene::instance()->map->getBonePos(nextNode->boneName);
+                    this->targetRotation = radToDeg(atan2f(nextNodePos.x - this->position.x, nextNodePos.z - this->position.z));
+
                     break;
                 }
             }

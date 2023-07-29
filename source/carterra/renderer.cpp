@@ -27,8 +27,6 @@ void crt::Renderer::start() {
 
 void crt::Renderer::drawLayerActors(const agl::lyr::RenderInfo& renderInfo) {
     DrawMgr::instance()->setTargetLayer(agl::lyr::Renderer::instance()->layers[7], 1);
-
     ActorMgr::instance()->drawActors();
-
     DrawMgr::instance()->resetTargetLayer();
 }
