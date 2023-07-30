@@ -6,14 +6,21 @@
 class CarterraSaveMgr : public CustomSaveMgr {
 public:
     struct CarterraSaveData : public CustomSaveData {
+        ENUM_CLASS(LevelCompletion,
+            NormalExit = 1 << 0,
+            SecretExit = 1 << 1
+        );
+        
         struct SaveSlot {
             SaveSlot()
                 : lastMap(1)
                 , lastNode(0)
+                , levelCompletions()
             { }
 
             u32 lastMap;
             u32 lastNode;
+            u8 levelCompletions[9][58];
         };
 
         CarterraSaveData()

@@ -81,6 +81,7 @@ namespace crt {
         Node** nodes;
         u32 pathCount;
         Path** paths;
+        bool* pathsUnlocked;
     };
 
     class Map : public MapActor {
@@ -97,6 +98,8 @@ namespace crt {
 
         Vec3f getBonePos(const sead::SafeString& boneName);
         MapData::Node* getNode(const sead::SafeString& name);
+
+        void evalPaths();
     
         ModelWrapper* model;
         ModelWrapper* bones;

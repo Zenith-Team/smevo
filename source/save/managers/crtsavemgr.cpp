@@ -1,5 +1,7 @@
 #include "tsuru/save/managers/crtsavemgr.h"
 #include "tsuru/save/system/savemgrsystem.h"
+#include "game/savemgr.h"
+#include "game/level/levelinfo.h"
 
 SEAD_SINGLETON_DISPOSER_IMPL(CarterraSaveMgr);
 
@@ -18,3 +20,17 @@ void CarterraSaveMgr::remakeSaveData() {
 }
 
 SAVEMGR_SYSTEM_ENTRY(CarterraSaveMgr);
+
+/** PATCHES: */
+
+void setNormalExitFlag() {
+    u32 lastSessionSaveSlot = SaveMgr::instance()->saveData->header.lastSessionSaveSlot;
+    CarterraSaveMgr::CarterraSaveData::SaveSlot* slot = &CarterraSaveMgr::sSaveData.saveSlots[lastSessionSaveSlot];
+    slot->levelCompletions[LevelInfo::instance()->world][LevelInfo::instance()->level] |= CarterraSaveMgr::CarterraSaveData::LevelCompletion::NormalExit;
+}
+
+void setSecretExitFlag() {
+    u32 lastSessionSaveSlot = SaveMgr::instance()->saveData->header.lastSessionSaveSlot;
+    CarterraSaveMgr::CarterraSaveData::SaveSlot* slot = &CarterraSaveMgr::sSaveData.saveSlots[lastSessionSaveSlot];
+    slot->levelCompletions[LevelInfo::instance()->world][LevelInfo::instance()->level] |= CarterraSaveMgr::CarterraSaveData::LevelCompletion::SecretExit;
+}

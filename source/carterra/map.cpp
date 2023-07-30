@@ -2,9 +2,11 @@
 #include "sme/carterra/scene.h"
 #include "dynlibs/os/functions.h"
 #include "game/resource/util.h"
+#include "game/savemgr.h"
 #include "sead/heapmgr.h"
 #include "sead/filedevice.h"
 #include "sead/filedevicemgr.h"
+#include "tsuru/save/managers/crtsavemgr.h"
 #include "log.h"
 
 namespace crt {
@@ -28,6 +30,51 @@ static void findUnlockCriteriaSize(u8* unlockCriteria, u32& idx) {
 			findUnlockCriteriaSize(unlockCriteria, idx);
 		}
 	}
+}
+
+static bool evaluateUnlockCriteria(u8*& in) {
+	u8 controlByte = *(in++);
+	u8 conditionType = (controlByte >> 6);
+
+	if (conditionType == 0) {
+		u8 subConditionType = controlByte & 0x3F;
+		switch (subConditionType) {
+			case 15:
+				return true;
+			default:
+				return false;
+		}
+	} else if (conditionType == 1) {
+		bool isSecret = (controlByte & 0x10);
+		u8 worldNumber = controlByte & 0xF;
+		u8 levelNumber = *(in++);
+
+		u32 conds = CarterraSaveMgr::sSaveData.saveSlots[SaveMgr::instance()->saveData->header.lastSessionSaveSlot].levelCompletions[worldNumber][levelNumber];
+
+		if (isSecret)
+			return (conds & CarterraSaveMgr::CarterraSaveData::LevelCompletion::SecretExit) != 0;
+		else
+			return (conds & CarterraSaveMgr::CarterraSaveData::LevelCompletion::NormalExit) != 0;
+	}
+
+	// Type: 2 = AND, 3 = OR
+	bool isAnd = (conditionType == 2);
+	bool isOr = (conditionType == 3);
+
+	bool value = isOr ? false : true;
+
+	u8 termCount = (controlByte & 0x3F) + 1;
+
+	for (int i = 0; i < termCount; i++) {
+		bool what = evaluateUnlockCriteria(in);
+
+		if (isOr)
+			value |= what;
+		else if (isAnd)
+			value &= what;
+	}
+
+	return value;
 }
 
 crt::MapData::MapData(u8* data) {
@@ -109,6 +156,11 @@ crt::MapData::MapData(u8* data) {
 
 		this->paths[i]->unlockCriteria = new u8[ucSize];
 		memcpy(this->paths[i]->unlockCriteria, unlockCriteria, ucSize);
+	}
+
+	this->pathsUnlocked = new bool[this->pathCount];
+	for (u32 i = 0; i < this->pathCount; i++) {
+		this->pathsUnlocked[i] = false;
 	}
 }
 
@@ -221,4 +273,18 @@ crt::MapData::Node* crt::Map::getNode(const sead::SafeString& name) {
 	PRINT("ERROR: Unable to find node: ", name.cstr());
 
 	return nullptr;
+}
+
+void crt::Map::evalPaths() {
+	for (u32 i = 0; i < this->map->pathCount; i++) {
+		if (this->map->pathsUnlocked[i]) {
+			continue;
+		}
+
+        this->map->pathsUnlocked[i] = evaluateUnlockCriteria(this->map->paths[i]->unlockCriteria);
+    
+		if (this->map->pathsUnlocked[i]) {
+			PRINT("New path unlocked! ", i);
+		}
+	}
 }
