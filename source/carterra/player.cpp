@@ -14,6 +14,7 @@ namespace crt {
     CREATE_STATE(Player, Idle);
     CREATE_STATE(Player, Walk);
     CREATE_STATE(Player, EnterLevel);
+    CREATE_STATE(Player, ExitLevel);
 }
 
 crt::Player::Player(const ActorBuildInfo* buildInfo)
@@ -28,7 +29,7 @@ u32 crt::Player::onCreate() {
     this->currentNode = crt::Scene::instance()->map->map->nodes[CarterraSaveMgr::sSaveData.saveSlots[SaveMgr::instance()->saveData->header.lastSessionSaveSlot].lastNode];
     this->position = crt::Scene::instance()->map->getBonePos(this->currentNode->boneName);
 
-    this->states.changeState(&crt::Player::StateID_Idle);
+    this->states.changeState(&crt::Player::StateID_ExitLevel);
 
     return this->onExecute();
 }
@@ -213,3 +214,25 @@ void crt::Player::executeState_EnterLevel() {
 }
 
 void crt::Player::endState_EnterLevel() { }
+
+/** STATE: ExitLevel */
+
+void crt::Player::beginState_ExitLevel() {
+    switch (GlobalStateKeeper::instance()->levelExitMethod) {
+        case LevelExitMethod::Quit: this->states.changeState(&crt::Player::StateID_Idle); break;
+        case LevelExitMethod::Die: this->modelMario.playAnim(CharacterModelMgr::Animation::LoseCry); break;
+        case LevelExitMethod::Win: this->modelMario.playAnim(CharacterModelMgr::Animation::CelebrateHop); break;
+    }
+}
+
+void crt::Player::executeState_ExitLevel() {
+    static int i = 100;
+
+    if (--i == 0) {
+        i = 100;
+
+        this->states.changeState(&crt::Player::StateID_Idle);
+    }
+}
+
+void crt::Player::endState_ExitLevel() { }
