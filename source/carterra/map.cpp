@@ -13,6 +13,9 @@ namespace crt {
     REGISTER_PROFILE(Map, ProfileID::CarterraMap);
 }
 
+static bool pathsUnlockedInited = false;
+bool crt::Map::pathsUnlocked[512] = {false};
+
 static void findUnlockCriteriaSize(u8* unlockCriteria, u32& idx) {
 	u8 controlByte = unlockCriteria[idx++];
 	u8 conditionType = controlByte >> 6;
@@ -157,11 +160,6 @@ crt::MapData::MapData(u8* data) {
 		this->paths[i]->unlockCriteria = new u8[ucSize];
 		memcpy(this->paths[i]->unlockCriteria, unlockCriteria, ucSize);
 	}
-
-	this->pathsUnlocked = new bool[this->pathCount];
-	for (u32 i = 0; i < this->pathCount; i++) {
-		this->pathsUnlocked[i] = false;
-	}
 }
 
 crt::Map::Map(const ActorBuildInfo* buildInfo)
@@ -198,6 +196,16 @@ crt::Map::Map(const ActorBuildInfo* buildInfo)
     this->map = new MapData(data);
 
     delete[] data;
+
+	if (pathsUnlockedInited == false) {
+		PRINT("Initing pathsUnlocked");
+
+		for (u32 i = 0; i < this->map->pathCount; i++) {
+        	Map::pathsUnlocked[i] = evaluateUnlockCriteria(this->map->paths[i]->unlockCriteria);
+		}
+
+		pathsUnlockedInited = true;
+	}
 }
 
 u32 crt::Map::onCreate() {
@@ -277,14 +285,17 @@ crt::MapData::Node* crt::Map::getNode(const sead::SafeString& name) {
 
 void crt::Map::evalPaths() {
 	for (u32 i = 0; i < this->map->pathCount; i++) {
-		if (this->map->pathsUnlocked[i]) {
+		if (Map::pathsUnlocked[i]) {
+			PRINT("Path ", i, " already unlocked!");
 			continue;
 		}
 
-        this->map->pathsUnlocked[i] = evaluateUnlockCriteria(this->map->paths[i]->unlockCriteria);
+        Map::pathsUnlocked[i] = evaluateUnlockCriteria(this->map->paths[i]->unlockCriteria);
     
-		if (this->map->pathsUnlocked[i]) {
+		if (Map::pathsUnlocked[i]) {
 			PRINT("New path unlocked! ", i);
+		} else {
+			PRINT("Path ", i, " still locked!");
 		}
 	}
 }

@@ -100,16 +100,24 @@ void crt::Player::executeState_Idle() {
 
             f32 otherNodeAngle = radToDeg(atan2f(otherNodePos.x - this->position.x, otherNodePos.z - this->position.z));
 
-            otherNodeAngle = fmodf(otherNodeAngle, 360.0f);
+            if (otherNodeAngle < 0.0f) {
+                otherNodeAngle += 360.0f;
+            }
 
-            if (sead::Mathf::abs(angle - otherNodeAngle) < 80.0f) {
+            if (otherNodeAngle > 360.0f) {
+                otherNodeAngle -= 360.0f;
+            }
+
+            PRINT("Target angle: ", angle, ". Other node angle: ", otherNodeAngle, ". Difference: ", sead::Mathf::abs(angle - otherNodeAngle));
+
+            if (sead::Mathf::abs(angle - otherNodeAngle) < 80.0f || sead::Mathf::abs(angle - (otherNodeAngle - 360.0f)) < 80.0f) {
                 this->currentPath = map->paths[i];
                 this->targetRotation = otherNodeAngle;
                 break;
             }
         }
 
-        if (this->currentPath != nullptr && crt::Scene::instance()->map->map->pathsUnlocked[i]) {
+        if (this->currentPath != nullptr && crt::Map::pathsUnlocked[i]) {
             this->states.changeState(&crt::Player::StateID_Walk); 
         } else {
             this->targetRotation = angle;

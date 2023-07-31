@@ -81,7 +81,6 @@ namespace crt {
         Node** nodes;
         u32 pathCount;
         Path** paths;
-        bool* pathsUnlocked;
     };
 
     class Map : public MapActor {
@@ -106,6 +105,8 @@ namespace crt {
         ModelWrapper* synchro;
         sead::Heap* sceneHeap;
         MapData* map;
+
+        static bool pathsUnlocked[];
     };
 
 }
