@@ -98,13 +98,15 @@ namespace crt {
         Vec3f getBonePos(const sead::SafeString& boneName);
         MapData::Node* getNode(const sead::SafeString& name);
 
-        void evalPaths();
+        void checkUnlocks();
     
         ModelWrapper* model;
         ModelWrapper* bones;
         ModelWrapper* synchro;
         sead::Heap* sceneHeap;
         MapData* map;
+        ModelWrapper** courseModels;
+        u32 courseModelCount;
 
         static bool pathsUnlocked[];
     };

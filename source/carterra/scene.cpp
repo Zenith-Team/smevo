@@ -82,7 +82,7 @@ void crt::Scene::prepare() {
 void crt::Scene::enter() {
     this->renderer.start();
 
-    this->map->evalPaths();
+    this->map->checkUnlocks();
 
     this->states.changeState(&crt::Scene::StateID_Active);
 }

@@ -167,6 +167,9 @@ crt::Map::Map(const ActorBuildInfo* buildInfo)
     , model(nullptr)
     , bones(nullptr)
     , sceneHeap((sead::Heap*)buildInfo->rotation) // Reuse the rotation field to pass the scene heap
+	, map(nullptr)
+	, courseModels(nullptr)
+	, courseModelCount(0)
 {
     sead::HeapMgr::instance()->setCurrentHeap(this->sceneHeap);
 
@@ -178,6 +181,7 @@ crt::Map::Map(const ActorBuildInfo* buildInfo)
     __os_snprintf(dataPath, 64, "course_select/%s.a2ls", name);
 
     loadResource(name, modelPath);
+	loadResource("cobCourse", "actor/cobCourse.szs");
 
     sead::FileHandle handle;
     sead::FileDeviceMgr::instance()->tryOpen(&handle, dataPath, sead::FileDevice::FileOpenFlag_ReadOnly, 0);
@@ -206,6 +210,22 @@ crt::Map::Map(const ActorBuildInfo* buildInfo)
 
 		pathsUnlockedInited = true;
 	}
+
+	u32 courseNodeCount = 0;
+	for (u32 i = 0; i < this->map->nodeCount; i++) {
+		if (this->map->nodes[i]->type == MapData::Node::Type::Level) {
+			courseNodeCount++;
+		}
+	}
+
+	this->courseModels = new ModelWrapper*[courseNodeCount];
+	for (u32 i = 0; i < courseNodeCount; i++) {
+		this->courseModels[i] = ModelWrapper::create("cobCourse", "cobCourse", 0, 0, 2);
+		this->courseModels[i]->playColorAnim("cobCourseClear");
+		this->courseModels[i]->texSrtAnims[0]->frameCtrl.speed = 0;
+	}
+
+	this->courseModelCount = courseNodeCount;
 }
 
 u32 crt::Map::onCreate() {
@@ -246,12 +266,40 @@ u32 crt::Map::onExecute() {
 	this->synchro->updateAnimations();
 	this->synchro->updateModel();
 
+	Mtx34 mtx;
+	for (u32 i = 0, j = 0; i < this->map->nodeCount; i++) {
+		if (this->map->nodes[i]->type == MapData::Node::Type::Level) {
+			CarterraSaveMgr::CarterraSaveData::SaveSlot* slot = &CarterraSaveMgr::sSaveData.saveSlots[SaveMgr::instance()->saveData->header.lastSessionSaveSlot];
+			u8 flag = slot->levelCompletions[this->settings1-1][this->map->nodes[i]->level.levelID-1];
+			bool completed = (flag & CarterraSaveMgr::CarterraSaveData::LevelCompletion::NormalExit) || (flag & CarterraSaveMgr::CarterraSaveData::LevelCompletion::SecretExit);
+
+			if (completed) {
+				this->courseModels[j]->playColorAnim("cobCourseClear");
+				this->courseModels[j]->texSrtAnims[0]->frameCtrl.speed = 0;
+				this->courseModels[j]->texSrtAnims[0]->frameCtrl.currentFrame = 1;
+			}
+
+			Vec3f pos = this->getBonePos(this->map->nodes[i]->boneName);
+			mtx.makeRTIdx(0, pos);
+			this->courseModels[j]->setMtx(mtx);
+			this->courseModels[j]->setScale(0.1f);
+			this->courseModels[j]->updateModel();
+			this->courseModels[j]->updateAnimations();
+
+			j++;
+		}
+	}
+
 	return 1;
 }
 
 u32 crt::Map::onDraw() {
     this->model->draw();
 	this->synchro->draw();
+
+	for (u32 i = 0; i < this->courseModelCount; i++) {
+		this->courseModels[i]->draw();
+	}
 
     return 1;
 }
@@ -260,6 +308,8 @@ u32 crt::Map::onDelete() {
     delete this->model;
     delete this->bones;
 	delete this->synchro;
+	delete this->map;
+	delete[] this->courseModels;
     
     return 1;
 }
@@ -283,19 +333,27 @@ crt::MapData::Node* crt::Map::getNode(const sead::SafeString& name) {
 	return nullptr;
 }
 
-void crt::Map::evalPaths() {
+void crt::Map::checkUnlocks() {
 	for (u32 i = 0; i < this->map->pathCount; i++) {
 		if (Map::pathsUnlocked[i]) {
-			PRINT("Path ", i, " already unlocked!");
 			continue;
 		}
 
         Map::pathsUnlocked[i] = evaluateUnlockCriteria(this->map->paths[i]->unlockCriteria);
-    
-		if (Map::pathsUnlocked[i]) {
-			PRINT("New path unlocked! ", i);
-		} else {
-			PRINT("Path ", i, " still locked!");
+	}
+
+	for (u32 i = 0, j = 0; i < this->map->nodeCount; i++) {
+		if (this->map->nodes[i]->type == MapData::Node::Type::Level) {
+			for (u32 k = 0; k < this->map->pathCount; k++) {
+				if (Map::pathsUnlocked[k]) {
+					if (this->map->paths[k]->startingNode == this->map->nodes[i] || this->map->paths[k]->endingNode == this->map->nodes[i]) {
+						this->courseModels[j]->playColorAnim("cobCourseOpen");
+						this->courseModels[j]->texSrtAnims[0]->frameCtrl.speed = 1;
+					}
+				}
+			}
+
+			j++;
 		}
 	}
 }
