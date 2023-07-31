@@ -108,8 +108,6 @@ void crt::Player::executeState_Idle() {
                 otherNodeAngle -= 360.0f;
             }
 
-            PRINT("Target angle: ", angle, ". Other node angle: ", otherNodeAngle, ". Difference: ", sead::Mathf::abs(angle - otherNodeAngle));
-
             if (sead::Mathf::abs(angle - otherNodeAngle) < 80.0f || sead::Mathf::abs(angle - (otherNodeAngle - 360.0f)) < 80.0f) {
                 this->currentPath = map->paths[i];
                 this->targetRotation = otherNodeAngle;
