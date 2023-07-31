@@ -5,6 +5,7 @@
 #include "sead/controllermgr.h"
 #include "sead/scopedlock.h"
 #include "sead/threadmgr.h"
+#include "sead/sharcarchiveres.h"
 #include "tsuru/save/managers/tsurusavemgr.h"
 #include "game/wrappedcontroller.h"
 #include "game/task/taskmgr.h"
@@ -14,6 +15,7 @@
 #include "sme/carterra/scene.h"
 #include "game/level/levelcamera.h"
 #include "game/graphics/tiletexmgr.h"
+#include "game/resource/resmgr.h"
 #include "agl/texturesampler.h"
 #include "agl/lyr/renderer.h"
 #include "log.h"
@@ -54,6 +56,7 @@ void drawHeapMgrImGui();
 void drawThreadMgrImGui();
 void drawMethodTreeMgrImGui(sead::DualScreenMethodTreeMgr* mgr);
 void drawTaskMgrImGui(sead::TaskMgr* mgr);
+void drawResMgrImGui();
 void drawActorMgrImGui();
 
 /** MAIN: */
@@ -111,6 +114,10 @@ static void drawMgrs() {
         drawThreadMgrImGui();
         drawMethodTreeMgrImGui((sead::DualScreenMethodTreeMgr*)sead::ControllerMgr::instance()->getMethodTreeMgr());
         drawTaskMgrImGui(sead::ControllerMgr::instance()->taskMgr);
+
+        if (ResMgr::instance()) {
+            drawResMgrImGui();
+        }
 
         if (ActorMgr::instance()) {
             drawActorMgrImGui();
@@ -503,6 +510,44 @@ static void drawTaskMgrImGui(sead::TaskMgr* mgr) {
         drawTaskListImGui(mgr->staticList, "StaticList");
         drawTaskListImGui(mgr->dyingList, "DyingList");
         drawTaskListImGui(mgr->destroyableList, "DestroyableList");
+    }
+}
+
+static void drawSharcArchiveResImGui(sead::SharcArchiveRes* archiveRes) {
+    sead::Buffer<const sead::SharcArchiveRes::FATEntry>& entrys = archiveRes->fatEntrys;
+
+    sead::FixedSafeString<128> fileName;
+
+    for (u32 i = 0; i < entrys.size; i++) {
+        archiveRes->getFATEntryName(&fileName, entrys[i]);
+
+        ImGui::Text(fileName.cstr());
+    }
+}
+
+static void resCallback(const sead::SafeString& key, ResMgr::ResHolder*& value) {
+    if (ImGui::TreeNode(key.cstr())) {
+        drawSharcArchiveResImGui(value->archiveRes);
+
+        ImGui::TreePop();
+    }
+}
+
+static void drawResMgrImGui() {
+    if (ImGui::CollapsingHeader("ResMgr")) {
+        ImGui::Text("Resource Num: %u", ResMgr::instance()->resHolderTreeMap.getSize());
+
+        ResMgr::instance()->resHolderTreeMap.forEach(&resCallback);
+
+        if (ResMgr::instance()->levelArchiveRes) {
+            ImGui::Separator();
+
+            if (ImGui::TreeNode("LevelArchiveRes")) {
+                drawSharcArchiveResImGui(ResMgr::instance()->levelArchiveRes);
+
+                ImGui::TreePop();
+            }
+        }
     }
 }
 
